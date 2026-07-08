@@ -1,0 +1,1692 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>きまぐれ神様の系譜観察帖</title>
+<style>
+:root{
+  --night:#16203A; --night-deep:#0E1526;
+  --washi:#F5F1E6; --washi-dim:#EAE4D3;
+  --ink:#2B2621; --ink-soft:#6B6154;
+  --shu:#B5402F; --gold:#B98A2E; --indigo:#3D5A80;
+  --danger:#B5402F; --line:#D8D0BC; --radius:10px;
+  --serif:"Shippori Mincho","Hiragino Mincho ProN","Yu Mincho","BIZ UDMincho",serif;
+  --sans:"Hiragino Kaku Gothic ProN","Yu Gothic","Noto Sans JP","Meiryo",sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  font-family:var(--sans);color:var(--ink);
+  background:
+    radial-gradient(1px 1px at 12% 18%, rgba(255,255,255,.55) 50%, transparent 51%),
+    radial-gradient(1px 1px at 34% 8%,  rgba(255,255,255,.4) 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 58% 22%, rgba(255,255,255,.5) 50%, transparent 51%),
+    radial-gradient(1px 1px at 76% 12%, rgba(255,255,255,.45) 50%, transparent 51%),
+    radial-gradient(1px 1px at 90% 30%, rgba(255,255,255,.35) 50%, transparent 51%),
+    linear-gradient(180deg, var(--night-deep) 0%, var(--night) 260px, #202B47 100%);
+  min-height:100vh; padding-bottom:40px;
+}
+button{font-family:inherit;cursor:pointer}
+button:disabled{cursor:not-allowed;opacity:.45}
+h1,h2,h3,.serif{font-family:var(--serif)}
+
+/* ============ 開始画面 ============ */
+#startScreen{max-width:640px;margin:8vh auto;padding:0 16px}
+.start-card{background:var(--washi);border-radius:var(--radius);padding:36px 32px;box-shadow:0 12px 40px rgba(0,0,0,.45)}
+.start-card h1{font-size:30px;letter-spacing:.08em;color:var(--ink);line-height:1.4}
+.start-card h1 .kami{color:var(--shu)}
+.start-sub{color:var(--ink-soft);margin:10px 0 22px;font-size:13.5px;line-height:1.9}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:12px;color:var(--ink-soft);margin-bottom:4px}
+.field input{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:6px;background:#fff;font-size:16px;font-family:var(--serif)}
+.start-btn{width:100%;margin-top:12px;padding:14px;background:var(--shu);color:#fff;border:none;border-radius:8px;font-size:17px;font-family:var(--serif);letter-spacing:.2em}
+.start-btn:hover{background:#9c3122}
+.test-note{margin-top:14px;font-size:11.5px;color:var(--ink-soft);border-top:1px dashed var(--line);padding-top:10px;line-height:1.8}
+
+/* ============ ヘッダー（常時固定） ============ */
+#gameScreen{display:none;max-width:1180px;margin:0 auto;padding:0 14px 14px}
+header.bar{
+  position:sticky; top:0; z-index:40;
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  color:#EFEAE0;padding:9px 10px;margin:0 -14px 10px;
+  background:rgba(14,21,38,.94); backdrop-filter:blur(2px);
+  border-bottom:1px solid rgba(255,255,255,.1);
+}
+.crest{
+  width:38px;height:38px;border-radius:50%;flex:none;
+  border:2px solid var(--gold);display:flex;align-items:center;justify-content:center;
+  font-family:var(--serif);font-size:18px;color:var(--gold);
+}
+.title-block .family-title{font-size:15px;font-family:var(--serif);letter-spacing:.06em}
+.hud{display:flex;gap:6px;flex-wrap:wrap;margin-left:auto;align-items:center}
+.hud .stat{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);border-radius:6px;padding:3px 9px;font-size:12px;white-space:nowrap}
+.hud .stat b{font-family:var(--serif);font-weight:500;margin-left:3px}
+.hud .stat.money b{color:#F0D48A}
+#statsBtn{background:transparent;border:1px solid rgba(255,255,255,.3);color:#DDE3F0;border-radius:6px;padding:5px 11px;font-size:12px}
+#statsBtn:hover{background:rgba(255,255,255,.1)}
+
+/* ============ レイアウト ============ */
+.cols{display:grid;grid-template-columns:300px 1fr;gap:12px;align-items:start}
+@media (max-width:860px){.cols{grid-template-columns:1fr}}
+.panel{background:var(--washi);border-radius:var(--radius);padding:11px 12px;box-shadow:0 6px 22px rgba(0,0,0,.25)}
+.panel + .panel{margin-top:10px}
+.panel h2{font-size:12.5px;letter-spacing:.1em;color:var(--shu);border-bottom:1px solid var(--line);padding-bottom:5px;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.panel h2 .sub{margin-left:auto;font-family:var(--sans);font-size:10px;color:var(--ink-soft);letter-spacing:0}
+
+/* ---- 家族一覧（コンパクト・数値表示） ---- */
+.member-row{
+  border:1px solid var(--line);border-radius:7px;background:#FBF8EF;
+  padding:6px 9px;margin-bottom:6px;cursor:pointer;font-size:12px;
+}
+.member-row:hover{background:var(--washi-dim)}
+.member-row.selected{border-color:var(--shu);box-shadow:0 0 0 2px rgba(181,64,47,.22)}
+.mr-line1{display:flex;align-items:center;gap:5px}
+.mr-line1 .nm{font-family:var(--serif);font-size:14px}
+.mr-line1 .rel{font-size:9.5px;color:#fff;background:var(--indigo);border-radius:4px;padding:1px 5px;white-space:nowrap}
+.mr-line1 .rel.head{background:var(--shu)}
+.mr-line1 .age{margin-left:auto;color:var(--ink-soft);font-size:11px}
+.mr-line2{display:flex;align-items:center;gap:7px;color:var(--ink-soft);font-size:10.5px;margin-top:2px;flex-wrap:wrap}
+.mr-line2 .job{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mr-line2 .nums{white-space:nowrap;display:flex;gap:6px}
+.mr-line2 .nums span{font-weight:500}
+.mr-line2 .crit{color:var(--danger);font-weight:700;font-size:13px}
+.mr-line2 .schoolscore{color:#7A5B18}
+.mr-line2 .mbar{display:inline-block;width:28px;height:4px;background:#E2DAC6;border-radius:2px;overflow:hidden;vertical-align:middle}
+.mr-line2 .mbar i{display:block;height:100%}
+.mr-line2 .mbar.h i{background:var(--shu)}
+.mr-line2 .mbar.e i{background:var(--indigo)}
+.mr-line2 .numwrap{display:inline-flex;align-items:center;gap:2px;white-space:nowrap}
+.departed{margin-top:6px}
+.departed summary{font-size:11.5px;color:var(--ink-soft);cursor:pointer}
+.departed .dm{font-size:11px;color:var(--ink-soft);padding:4px 2px;border-bottom:1px dashed var(--line)}
+.departed .dm.dead .dnm{text-decoration:line-through}
+.departed .dm .fw{display:block;font-size:10.5px;color:var(--ink-soft);font-family:var(--serif);margin-top:1px;line-height:1.6}
+
+/* ---- 時間操作 ---- */
+.time-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
+.time-grid button{padding:8px 4px;border:1px solid var(--line);background:#fff;border-radius:6px;font-size:12px}
+.time-grid button:hover:not(:disabled){background:var(--washi-dim)}
+.auto-row{display:flex;align-items:center;gap:7px;margin-top:8px;font-size:11.5px;flex-wrap:wrap}
+.auto-row select{padding:3px 5px;border:1px solid var(--line);border-radius:5px;background:#fff}
+
+/* ---- 年代記（最上部・5行＋スクロール） ---- */
+#logPanel .log-list{max-height:150px;overflow-y:auto;padding-right:4px}
+.log-entry{display:flex;gap:8px;padding:3px 2px;border-bottom:1px dashed var(--line);font-size:11.5px;line-height:1.55}
+.log-entry .when{flex:none;width:74px;color:var(--ink-soft);font-size:10px;font-family:var(--serif);padding-top:1px}
+.log-entry.imp .txt{font-family:var(--serif);color:#3A3025}
+.log-entry.imp .when{color:var(--shu)}
+.log-entry.anniv{background:#F1EADA;border-radius:6px;padding:6px;border-bottom:none;margin:3px 0}
+
+/* ---- プロフィール ---- */
+.profile-head{display:flex;gap:9px;align-items:center}
+.sprite-slot{
+  width:46px;height:46px;flex:none;border-radius:8px;border:1px dashed var(--line);
+  display:flex;align-items:center;justify-content:center;font-size:24px;background:#FBF8EF;
+}
+.profile-head .nm{font-family:var(--serif);font-size:16px}
+.profile-head .meta{font-size:11px;color:var(--ink-soft);margin-top:1px}
+.chip{display:inline-block;font-size:10px;background:var(--washi-dim);border:1px solid var(--line);border-radius:20px;padding:0px 8px;color:var(--ink-soft)}
+.chip.pers{background:#EFE6D2;color:#7A5B18;border-color:#DCC993}
+.rename-inline{display:flex;gap:5px;margin-top:4px}
+.rename-inline input{flex:1;padding:3px 6px;border:1px solid var(--line);border-radius:5px;font-size:12px;font-family:var(--serif)}
+.rename-inline button{border:1px solid var(--line);background:#fff;border-radius:5px;padding:2px 9px;font-size:11px}
+.pf-line{font-size:12px;color:var(--ink-soft);margin-top:6px;line-height:1.7}
+.pf-line b{color:var(--ink);font-weight:500}
+.policy-row{display:flex;gap:5px;margin-top:5px}
+.policy-row button{flex:1;font-size:10.5px;padding:4px 2px;border:1px solid var(--line);background:#fff;border-radius:6px}
+.policy-row button.on{background:var(--indigo);color:#fff;border-color:var(--indigo)}
+.pf-events{margin-top:7px;font-size:11px;color:var(--ink-soft);max-height:64px;overflow-y:auto}
+.pf-events li{list-style:none;padding:2px 0;border-bottom:1px dashed var(--line);line-height:1.5}
+.arrow-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:6px;margin-top:9px}
+.arrow-btn{border:1px solid var(--line);background:#fff;border-radius:7px;padding:6px 6px;text-align:left;font-size:10.5px;line-height:1.45}
+.arrow-btn:hover:not(:disabled){background:var(--washi-dim)}
+.arrow-btn b{font-size:11.5px;font-family:var(--serif)}
+.arrow-btn .stock{color:var(--shu);font-weight:bold}
+.no-select{color:var(--ink-soft);font-size:12.5px;padding:12px 4px;text-align:center}
+.love-box{margin-top:10px;background:#F1EADA;border-radius:8px;border-left:3px solid var(--gold);padding:8px 10px;display:flex;gap:9px;align-items:center}
+.love-box .lface{font-size:26px}
+.love-box .ldetail{font-size:11.5px;color:#4A4238;line-height:1.6}
+.love-box .ldetail b{font-family:var(--serif);font-size:13px}
+
+/* ---- 神棚（コンパクト・チップ表示） ---- */
+.kami-chips{display:flex;flex-wrap:wrap;gap:6px}
+.kami-chip{border:1px solid var(--line);border-radius:20px;padding:3px 11px;font-size:11px;background:#fff;color:var(--ink-soft);position:relative}
+.kami-chip.active{border-color:var(--gold);background:#FBF4DF;color:#7A5B18;font-weight:500}
+.kami-chip:hover .kami-tip{display:block}
+.kami-tip{display:none;position:absolute;bottom:120%;left:0;background:var(--night-deep);color:#EFEAE0;font-size:10.5px;padding:5px 8px;border-radius:6px;white-space:nowrap;z-index:10}
+
+/* ---- 持ち物・ショップ ---- */
+.inv-row{display:flex;align-items:center;gap:7px;padding:5px 3px;border-bottom:1px dashed var(--line);font-size:11.5px}
+.inv-row .cnt{font-family:var(--serif);color:var(--shu);min-width:30px;text-align:right}
+.inv-row .use{margin-left:auto;border:1px solid var(--line);background:#fff;border-radius:6px;padding:2px 10px;font-size:11px}
+.inv-row .use:hover:not(:disabled){background:var(--washi-dim)}
+.two-tabs{display:flex;gap:0;margin-bottom:8px;border-bottom:2px solid var(--line)}
+.two-tabs button{flex:1;border:none;background:transparent;padding:6px;font-size:12px;color:var(--ink-soft);border-bottom:2px solid transparent;margin-bottom:-2px;font-family:var(--serif)}
+.two-tabs button.on{color:var(--shu);border-bottom-color:var(--shu)}
+.tab-scroll{max-height:220px;overflow-y:auto}
+.shop-row{display:flex;align-items:center;gap:7px;padding:5px 3px;border-bottom:1px dashed var(--line);font-size:11.5px}
+.shop-row .price{font-family:var(--serif);color:#7A5B18;min-width:40px;text-align:right}
+.shop-row .buy{margin-left:auto;border:1px solid var(--gold);color:#7A5B18;background:#FBF4DF;border-radius:6px;padding:2px 10px;font-size:11px}
+.shop-row .buy:hover:not(:disabled){background:#F3E6BE}
+.shop-row .desc{color:var(--ink-soft);font-size:10px}
+
+/* ---- 結果・統計・保留オーバーレイ ---- */
+.overlay{position:fixed;inset:0;background:rgba(10,14,26,.82);display:none;align-items:center;justify-content:center;z-index:50;padding:16px}
+.overlay.show{display:flex}
+.overlay .box{background:var(--washi);border-radius:12px;max-width:520px;width:100%;padding:26px 26px;box-shadow:0 20px 60px rgba(0,0,0,.5);max-height:86vh;overflow-y:auto}
+.overlay h2{font-size:20px;font-family:var(--serif);letter-spacing:.12em;margin-bottom:10px}
+.overlay h2.win{color:var(--gold)}
+.overlay h2.lose{color:var(--indigo)}
+.overlay p{font-size:13px;line-height:1.9;color:#4A4238}
+.overlay .btns{display:flex;gap:9px;margin-top:18px;flex-wrap:wrap}
+.overlay .btns button{flex:1;padding:11px;border-radius:8px;font-size:13.5px;border:none;font-family:var(--serif)}
+.btn-shu{background:var(--shu);color:#fff}
+.btn-plain{background:#fff;border:1px solid var(--line) !important;color:var(--ink)}
+.stat-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:6px}
+.stat-table td,.stat-table th{border-bottom:1px dashed var(--line);padding:5px 4px;text-align:left}
+.stat-table th{color:var(--ink-soft);font-weight:normal;font-size:10.5px;width:42%}
+.close-x{float:right;border:none;background:transparent;font-size:18px;color:var(--ink-soft)}
+footer.credit{max-width:1180px;margin:14px auto 0;color:#8791A8;font-size:10px;text-align:center;padding:0 16px}
+
+/* ---- トースト ---- */
+.toast{position:fixed;left:50%;bottom:22px;transform:translate(-50%,16px);background:var(--night-deep);color:#EFEAE0;
+  padding:10px 18px;border-radius:8px;font-size:12.5px;max-width:88%;text-align:center;line-height:1.7;
+  opacity:0;transition:opacity .3s, transform .3s;z-index:80;box-shadow:0 8px 24px rgba(0,0,0,.4)}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+</style>
+</head>
+<body>
+
+<!-- ============ 開始画面 ============ -->
+<div id="startScreen">
+  <div class="start-card">
+    <h1>きまぐれ<span class="kami">神様</span>の<br>系譜観察帖</h1>
+    <p class="start-sub">
+      あなたは、ひとつの家族をきまぐれに見守る神様。<br>
+      矢とご加護でそっと導きながら、一族の系譜を<b>250年</b>先まで観察しましょう。<br>
+      当主が世を去ったとき、跡を継ぐ者がいなければ——系譜はそこで途絶えます。
+    </p>
+    <div class="field">
+      <label>家族の姓（例：見守）</label>
+      <input id="inpSurname" type="text" placeholder="見守" maxlength="8">
+    </div>
+    <div class="field">
+      <label>初代当主の名前（空欄ならおまかせ）</label>
+      <input id="inpFirstName" type="text" placeholder="例：太一" maxlength="8">
+    </div>
+    <button class="start-btn" id="btnStart">見守りを始める</button>
+    <p class="test-note">
+      ※現在はテスト版です。時間の節目を製品版の1/4に短縮しています（クリア：250年／時代の移り変わり：約62年ごと）。人の寿命そのものは現実のままですが、49歳までは天寿を全うでき、死は50歳から起こります。
+    </p>
+  </div>
+</div>
+
+<!-- ============ ゲーム画面 ============ -->
+<div id="gameScreen">
+  <header class="bar">
+    <div class="crest" id="crest">見</div>
+    <div class="title-block"><div class="family-title" id="hdFamily">見守家</div></div>
+    <div class="hud">
+      <div class="stat">経過 <b id="hdTime">0年0月</b></div>
+      <div class="stat">時代 <b id="hdEra">現代</b></div>
+      <div class="stat">世代 <b id="hdGen">初代</b></div>
+      <div class="stat">家族 <b id="hdFamCount">1/7</b></div>
+      <div class="stat money">蓄え <b id="hdMoney">0G</b></div>
+      <div class="stat">ランク <b id="hdRank">—</b></div>
+      <button id="statsBtn">統計</button>
+    </div>
+  </header>
+
+  <div class="cols">
+    <!-- 左カラム -->
+    <div>
+      <div class="panel">
+        <h2>家族一覧</h2>
+        <div id="memberList"></div>
+        <details class="departed" id="departedBox" style="display:none">
+          <summary id="departedSummary">旅立った人・見送った人</summary>
+          <div id="departedList"></div>
+        </details>
+      </div>
+      <div class="panel">
+        <h2>時のすすめ方</h2>
+        <div class="time-grid">
+          <button id="btnM1">1ヶ月</button>
+          <button id="btnY1">1年</button>
+          <button id="btnY100">100年早送り</button>
+        </div>
+        <div class="auto-row">
+          <label><input type="checkbox" id="autoChk"> オート再生</label>
+          <select id="autoSpeed">
+            <option value="1000">ゆっくり</option>
+            <option value="450" selected>ふつう</option>
+            <option value="140">はやい</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- 右カラム -->
+    <div>
+      <div class="panel" id="logPanel">
+        <h2>年代記 <span class="sub">新しい出来事から順に</span></h2>
+        <div class="log-list" id="logList"></div>
+      </div>
+      <div class="panel" id="profilePanel">
+        <h2>見守り中の人</h2>
+        <div id="profileBody"><div class="no-select">家族一覧から、見守りたい人を選んでください。</div></div>
+      </div>
+      <div class="panel">
+        <h2>神棚 <span class="sub">同時1つ・毎月お供え</span></h2>
+        <div class="kami-chips" id="kamidanaList"></div>
+      </div>
+      <div class="panel">
+        <h2>持ち物 <span class="sub">「使う」は選んだ人へ／「買う」で購入</span></h2>
+        <div class="tab-scroll">
+          <div id="invBody"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer class="credit">きまぐれ神様の系譜観察帖（テスト版・TIME_SCALE=1/4）</footer>
+
+<div class="overlay" id="resultOverlay"><div class="box" id="resultBox"></div></div>
+<div class="overlay" id="statsOverlay">
+  <div class="box">
+    <button class="close-x" onclick="document.getElementById('statsOverlay').classList.remove('show')">✕</button>
+    <h2>これまでの記録</h2>
+    <div id="statsBody"></div>
+  </div>
+</div>
+<div class="overlay" id="pendingOverlay"><div class="box" id="pendingBox"></div></div>
+
+<script>
+"use strict";
+/* =====================================================================
+   きまぐれ神様の系譜観察帖  v3（テストスケール 1/4）
+   -----------------------------------------------------------------
+   単一HTMLファイルで完結する家族見守りシミュレーションゲーム。
+   詳しい仕様は同梱の「仕様書.md」を参照。
+
+   ファイル構成（このスクリプト内）：
+     1. 定数・マスタデータ（時間スケール／確率／職業／学校／性格／
+        神棚／ショップ／顔素材アセット／名前リスト 等）
+     2. ユーティリティ関数（乱数・ログ・遺伝子生成 等）
+     3. ゲームロジック本体（tickMonth = 毎月の処理の起点）
+     4. UI描画（if (typeof document !== 'undefined') 以下のみブラウザで実行）
+     5. Node.js等での検証用エクスポート（globalThis.__game）
+
+   S（グローバル変数）がゲーム全体の状態を保持するシングルトン。
+   セーブ/ロードは行わず、ブラウザを閉じると進行状況は失われる。
+
+   -----------------------------------------------------------------
+   🔧 パラメータを調整したいときは
+   -----------------------------------------------------------------
+   このファイル内を「🔧」で検索すると、調整しやすい主要な数値の
+   場所にジャンプできます（Ctrl+F / Cmd+F で「🔧」を検索）。
+   主な調整ポイント（ファイル内の登場順）：
+     ・MAX_FAMILY / MAX_CHILDREN / ADULT_M / RETIRE_JOB_AGE  … 基本の人数・年齢設定
+     ・P{ ... }                … 就職/恋愛/結婚/出産などの毎月の確率まとめ
+     ・JOB_TYPES               … 職業ごとの月給・出世率・失職率
+     ・SCHOOLS                 … 進学先の判定ラインと給料ボーナス
+     ・KAMIDANA                … 神棚の維持費（効果本体はtickMonth内）
+     ・SHOP                    … 矢・アイテムの価格
+     ・inheritGenome内mutateP  … 見た目の突然変異率
+     ・livingCostOf()          … 生活費
+     ・tickMonth内のハート自然減衰／熱中度ゆらぎ／死亡判定／困窮ダメージ
+   より詳しい調整ガイド（数値の一覧表）は同梱の「調整ガイド.md」を参照。
+   ===================================================================== */
+
+/* ---------- 🔧時間スケール定数（クリアまでの長さを決める一番大きなダイヤル） ----------
+   TIME_SCALE=4 が「製品版の1/4の早さでクリアする」テスト版設定。
+   1 に変えると製品版相当（1000年クリア・時代250年ごと）に戻る。
+   例：8にすると125年クリアとさらに短くなる。数字が大きいほど短時間で終わる。 */
+const TIME_SCALE = 4;
+const GOAL_MONTHS      = 12000 / TIME_SCALE;   // クリアに必要な月数（TIME_SCALEから自動計算・直接は編集不要）
+const ERA_MONTHS       = 3000  / TIME_SCALE;   // 時代が切り替わる周期
+const BOOKMARK_MONTHS  = 1200  / TIME_SCALE;   // 時のしおり自動入手・記念日ログの周期
+const ANNIV_MONTHS     = 1200  / TIME_SCALE;
+const MAX_FAMILY   = 7;      // 🔧同時に家に住める人数の上限（増やすと分家・断絶が起きにくくなる）
+const MAX_CHILDREN = 3;      // 🔧1組の夫婦がもうけられる子の上限（増やすと人口が増えやすくなる）
+const ADULT_M   = 18*12;     // 🔧成人と見なす年齢（就職・恋愛・結婚・出産が可能になる。×12で月齢に変換）
+const RETIRE_JOB_AGE = 65*12;// 🔧定年退職の目安年齢（これを過ぎると毎月P.teinenの確率で定年）
+const CHILD_MIN_M = 6*12, CHILD_MAX_M = 18*12; // 🔧学業・スポーツが変動する年齢範囲
+
+/* ---------- 🔧月あたりの発生確率（ゲームバランスの主要ダイヤル） ----------
+   ここを直接書き換えるだけでゲーム全体の難易度が変わります。
+   job        : 22歳以上・熱中度40以上の無職が就職する確率
+   lover      : 18〜59歳の独身に恋人ができる確率
+   marry      : 交際中（仲良し度70以上）が結婚する確率
+   birth      : 結婚中の女性（条件を満たす場合）が出産する確率
+   interest   : 興味・関心が変わる確率（きまぐれ性格は2倍）
+   fire       : 挑戦職が失職する確率
+   teinen     : 65歳以上の有職者が定年退職する確率
+   quitBase   : 熱中度20未満の人が仕事を辞める確率の基礎値（職業タイプ倍率あり）
+   breakup    : 仲良し度20未満の交際が自然消滅する確率
+   persEvent  : 性格固有のフレーバーイベントが起こる確率
+   itemGain   : 毎月アイテムを自動で授かる確率
+   schoolEvent: 子ども（6-18歳）の学業/スポーツが変動する確率 ---------- */
+const P = {
+  job: 0.05, lover: 0.10, marry: 0.10, birth: 0.05,
+  interest: 0.01, fire: 0.01, teinen: 0.02,
+  quitBase: 0.015, breakup: 0.03, persEvent: 0.008, itemGain: 0.01,
+  schoolEvent: 0.05
+};
+
+const ERAS = ['現代','近未来','遠未来'];
+const INTERESTS = [
+  ['絵を描くこと','スポーツ','料理','読書','ゲーム','音楽','旅行','園芸','将棋'],
+  ['プログラミング','ドローンレース','AI研究','バーチャル探索','宇宙工学','再生医療','ロボット工作'],
+  ['星間航行の研究','テラフォーミング','量子芸術','惑星外交','意識転送の研究','重力制御']
+];
+const INTEREST_ROLE = {
+  '学業':'研究者','スポーツ':'アスリート',
+  '絵を描くこと':'画家','料理':'料理人','読書':'物書き','ゲーム':'ゲームクリエイター',
+  '音楽':'音楽家','旅行':'旅行家','園芸':'庭師','将棋':'棋士',
+  'プログラミング':'エンジニア','ドローンレース':'レーサー','AI研究':'研究者','バーチャル探索':'探索家',
+  '宇宙工学':'技師','再生医療':'医療研究者','ロボット工作':'工作家',
+  '星間航行の研究':'航行研究者','テラフォーミング':'開拓者','量子芸術':'芸術家','惑星外交':'外交官',
+  '意識転送の研究':'研究者','重力制御':'制御技師'
+};
+const JOB_TIER_PREFIX = ['かけだしの','一人前の','知る人ぞ知る','著名な'];
+
+/* ---------- 顔アセット（自動生成：髪10種×肌/髪レイヤー分離＋アンカー座標） ----------
+   w,h        : 画像の幅・高さ(px)
+   cx,cy      : この髪型における「顔（肌色部分）」の中心座標
+   fw,fh      : 顔の幅・高さ（目・口パーツを重ねる際のスケール計算に使用）
+   skin/hair  : それぞれ透過PNG(base64)。肌と髪を別レイヤーにしてあるため、
+                髪だけをCSSのfilterで色変更できる（肌色は変わらない）。
+   boy[0]/girl[0] が「基準髪型」。FACE_COMBOSはこの基準に対して位置決めされており、
+   他の髪型はcx/cyの差分だけ平行移動して使う（portraitHTML参照）。 */
+const FACE_ASSETS = {
+  boy: [
+    {w:110,h:104,cx:49.0,cy:72.5,fw:66.0,fh:39.0,
+     skin:'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAG4AAABoCAMAAAAn3DXUAAAAwFBMVEUAAAD+8N3+7tz+9eX46dX45tT56db67uP65dD78Nz99OP78uEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADsVk+aAAAAMHRSTlMA/v3+sY/O/XjepcwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACThmgaAAADaklEQVR42u1Y27KkIAwk3Tqzl///35VLIEF0R8d92SJ16pToSJOk0wRDmDZt2rRp06ZNmzZt2rRp06ZNmzZt2mfG/9u7592Dm5I4GjwTWvZwdghxoyfQxM3ihoB9JnjAPYgFiOiwA7Y0ih3dZTjcNHFUM7ahtaVsD75wD2aWOA/bYDP1W2o4JS3rLmMrI1DwJE0S/UkgKZJ5kKZGwha8h/z6IGPlBahH25hQ7wTmUtoDDBn7MUFYw+cQMor+i0/KQ/Cdo3CtJlj9oboHh2PhkAGbe4JrpGGZhj2G9RX2/jZkcpEpw4JwGa4PX8VFih5GPm94LomnVkt4gCND/zBILM7h0HwqBE7e8QiHPVVabOv9OidxoPhLgoN3DrvUWX/gK8Ouo4oql7F3iRuZUjDT8rQIII2b7hda7SpBai9WuCiHsUBLGbTJfeAaRgZyPuvNJnNcPQuhtVbezThJ4dU/DEphVBfeuxKeZbiBpXrxkEioNCun51AWTUEXy1zmWhIejr13LnA8IChqSl0wm8LqZceVhca7/D52rDdhNYXNDh/7ctkFM6h4843dW5Rd4Dj2c3enkWDtxF8pWlPuQ0pTV+8OrpYATHrhtK2Dq41CYmCTw+JpTp5dcKvmAtSn0N6RnawsNYtU9f1IMx1op5qGa4fi+SIGouGZBxoBY/cD9KW4Jep1LNaLDR3HWkk4JWG/JZCVVNvfGVryUIOJXewacSGj506u4yTE65NtbykVaKjS1g8jIcABHHo6nm+zLt1w2xnqli7mCuL22mutEbqiE+8QGhNGzslgkztPYKfC6LoSeGQX1tQiXW2iW7zogtfY4tXVNg+4flSgTQdG5Yw+v21fBG7A+SLYRa3b4WwaL9HSd7ZWZlrPXHiCAXUFvHGKhQ1WIgUHxezSSZWVOwe87EMpc00d46g1Fr65zBJK/gh38QSUcRdmNyq/Aa/hnjF718pgcIGuDnitwH3TlPsR+taklzNYQf3q20PploDRWcfJTPlJWL6BC5ENdKSnLQ6vNPj+k9XPoAcr7A559rScsvzAV6NFd2fdX7FvKzMwX+EJA3NXjv5AYqQl8mgNDxlIlKJPPsKcmFFuPPyRka6/av0IbsvWXxGpB3KFik0JP2yA7n5JpaooIxSW8C9tXZdfv7NjyxqmTfuP7A92BBD/V6fh9gAAAABJRU5ErkJggg==',
+     hair:'data:image/png;base64,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'},
+    {w:110,h:104,cx:54.0,cy:74.5,fw:72.0,fh:35.0,
+     skin:'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAG4AAABoCAMAAAAn3DXUAAAAwFBMVEUAAAD+8N3+7tv+9+f56tX559T459P46NT56db37+L99OQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADR8x3sAAAAMHRSTlMA/v3+0bCSdVj+2gAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAGKeaSAAADVElEQVR42u1Y25biMAyr5RbY/f8P3pLEthxaGKCdhz3xzJlLKVWkyJcwTSNGjBgxYsSIESNGjBgxYsSIESNGjBhxdujvPh8no/V0cC4/oIM/E09FOrwVv2OsB+JDVsD0PMUDv6MAV+lEeoJ4IKw4xsUNrSN4x9NuVYdJWYMACuUO8GFDP4nCDJVfAkQPuF7Bt3mtcGrt14qgJHJFvPOSIvCWY1+wplU6moA01QrnK1j/0EJ3vdQlUXvgLm8oXCMNEAczRNAKipPa/92G6nM41E3RB3Kkavmuv9oXvVb07SQFsF2IrhMIrvjPFo8qKeAU40ej1l5DRixo2EyURVGfYHBIKjoLNPnahtFdsBeje1QFtuj9tSeQ+5SeJbH+qqcBSpCr9xS8SqneuQU3q6nGW6dsFUNzMs0lZpW4SaeGWXPksgd3/9ZUUcIq3b/Gsalil2yb18f8aepvwS1qK1XK8QQHM4iERb2upnvrrpi2et1PhPtqBBsuoZ0zu7hHXWJj6m4tPK/b3TTelbiBt6V5n8yRVgQm2NTV205Ndj+Dk7ejJ+6Q5JKwr6elSbxZVsruReVIy4VpI6RlqyQQ/tcouQq7482sITgr4rJQ+QjTUBXr9qH1jXnaxbOFde+ljTA/RpZDMjxI3bWkzPsNaJ7ceVElQldP89A712++0NrH04Z3We9QgiSTk43IQgYu8SbPS8VyfdXPL/McDiTrJJISrnD8uLP9WG4/nSEWq2i56keeS7Dn1KSVvDUsiU0EKQmpqvgmPvQJq2DvHg+6OhbtFFTAKDnpAuTNSbAMLhCaS7q+A8/mLkdqar87CabGSXMD+ixsHceh5FkleTqzI6URtwSrp5GaYC8JPprZ0Y8sqX6ja+5B85MZvuZ7XwJTKqRU8fV9eOZseKSckJae4F6/zUSfnk/acUeSVSgNhfp41OpnRfkn/HKJFkrzSPVI828OX0r+hNDkRVMLt328XU62BhhIJkFtnkY9vGhvPysv4nbhcizhe/u6oy0HHGNBZ0qJ6hFFpl065pTeCNLIQ8egSBD9Vkhvf5MCjymeGutRH0C0oUlVsBvHghVAqDI9SWCnfCCnmWMdEtbD1TKdFiigFivo5fRPbS/LPC/LcrnephEj/pv4B2wPEYRx3mE8AAAAAElFTkSuQmCC',
+     hair:'data:image/png;base64,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'},
+    {w:110,h:104,cx:52.0,cy:74.5,fw:62.0,fh:35.0,
+     skin:'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAG4AAABoCAMAAAAn3DXUAAAAwFBMVEUAAAD97dr+8N399+j46NP56dT45tH45tD37uQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADr281XAAAAMHRSTlMA/f790G2TuP0AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABQ+AHXAAADE0lEQVR42u1ZyZbjIAyMqrL0/3/xYEBCbJ7YTg7dD92IbJVKG5jcbkuWLFmyZMmSJUuWLFmyZMmSJUv+uvAvcJCZRr5Cb2Z17sc1OJnBdY7wE8Gc0BsoPsBXMKEX4OQLcDKhx14h4PVYyoSeBOLvpfkYuQm9Da7WhF+ukwMgU0/aPF+aT0REw5BehKuytT17Ag0/3mSwMWxpaelRcIqeOAMJcFRz0uIxenY8lGgsBjSZwTn7IfRn6KkJZoMYm1FXanaHBzctQKLsIj2O4SAV3HvhfIRqpJm5NewiPQ7Gm3gFfRVTdpu+dLPFB1Jyh76nii81u2SG02Eb5E7LgrlFqeC64WJw+cUfv+J8GqUGVW0ZvQbHxG4El1yJeaU4dkz1vDsa44OwZhKU5AH9yHL0PFxabS9P4YoztOLWSskJkuZ1Khp16mgq8wLYgTNndNBHD0rnSZu97A2NkVaKFDMTuActmLTmZV2ZufvcZHXBjAnOsVSvRaY9n0xD4aKzEOVnwUQ9Ih2cPqC5Y+ddfbpL74ZyTi+DjhxSOAUVHguAi3qGy85xJ3nbg2Uma52UuZK6wQ0RTy7p4maFMhrmu4BUAr/OUyV7oUOxZ+cX2GtzP0M8Lalyp9gVnDgVqid3N4chXmEH+9E2h6owpV/x/4eukjM4ipohqfaACZzyfetI6bc4b8acKJufh9NyUXC+s+sxiPRibV6qiBwkT8uXBz5OOACrU6ntgGGtyMEvMXbVovsdvIK0g0wNd+KgjpqN5Sdp0Og83vFv2kLHwzmuTRVV7I4f/Ng2X40OGTAvK56CQ9sHE0DfkScP7bcuYIKel29JC8O570lxm0obMOlyp4Bn0ZrmQzNBB6WCd8bkHhx6OExKRX/h+U/zeflhFMsL1Fo8OzwYOYx0vHbtwEmxV03ijrwXrwEKIIwEZgOOl8G28xn8VMGwTtPx5fWR+zcQmiDj1bUgPnj5J/myo6LjS5MfvmncAGdtHtjfHx++0XxuVjEYlsGP55cuiSWm0eYKNwdet+/J83XfUDYJcPf1T8OSJb9D/gEbYA3Ox1r57AAAAABJRU5ErkJggg==',
+     hair:'data:image/png;base64,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'},
+    {w:110,h:104,cx:57.5,cy:60.5,fw:63.0,fh:61.0,
+     skin:'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAG4AAABoCAMAAAAn3DXUAAAAwFBMVEUAAAD+8N3+7tz+9uX46NT559P36NP249D37+T88uAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABcB2dTAAAAMHRSTlMA/v39z5CycP/fAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAoB6SSAAAD+0lEQVR42u1Zi5KjOAxE3YTd/f8fvhj8aNkGDsNsXV2hqpkkk4RGstQtaabptddee+2111577bXXXvu/Gf2r3/xRMDM4MyN/CGm7fHiw8MjwPMJ/MR9EZXIlXn97Ep7aZuHdhwC5Xh8RYcVIKGoB8Bm01QuIKy3U5vaDcVS01jus8eQjzm1xFPcERZ58IW/jSYrEi8MgQLSUrOHnIeewRiuCAt1gru/ytnOWYbJvHg+pFG5HM+U/vFPoVcL2zu2S244lwoEptJIq0fPtxZ1QuvTDmWshc26EE5kgYUCnEKCZcjOczAkPn4+J1JrUjI/DzsE5gpKCRwHFkCQR3osMgZSrjp71kxznE5EBdI/tmWrgJgMmPhXy7GJoIIZOLum2ASf5f9s/OgSIV1H+DrDsshQRkhvIFLxX5j5VBqRIag2pEI6iV8kghmIJqxXhjMUw4h2VR1y5n1ZBJD5eJ2co6Uev2KCxFKe2SrwWS+ZGOeWBMDSoaHpf+RPhMp9/NwXQVLPTAbrDQ6fx04LHdiZn8r3qI0VPUfq6mj19XqZmM+lwuMwJW6+fXFHhNLouc+xWQ/kAwlX457QT4oRIyXCJiZZiVCRgLvixZs/Hge9vWglLI0DhujlVSCXocn/pKLgPOBP5pt1s5WaEWlzh9CD3bfHL4G56ghqiPAsAvvGr+r/cXqSMTSkWU2Y+jqVCmPe1lbbctwtxJuk6iybbjsD1KLVPQito1SrWxSEcHK3DOq/gPGpYVGdoS4W1D0dS8ywrgr+T7niHakDZuHM5SpXWu1TWQGZKdE5Om16UMjyi6nB4lHNDI9mleUC3K5JES0S4i/Zhp3mE5gatw//+xmjQb+/XQSk8MzfneMZHI2+9oo/UcszRFP7ISpePDi6mVSTkz8jKcCKyyyTV6uZHybyKxdhXBKx5cKJ3H5tYDrsJ0Ho0TgcbBcxzy5fql3Mx/8wh4j5C5sW6w15OEVaqXK50RkSqXFk6NM0D9OSKmASBmkeWRZBZUrQc2qCZ6EC+m8tNtIkmJIF2HNzL/xLasfVliqdbLCK3fnASUOAunVxU9jrhnCSgZmgtQl4f8JD3UwZUN1/BoapGjmwDCD+QCEx3xVh8H5rNl7RbTL55VkE7KKdfY4uOmf5Ejra1JRBXS67pJnIjJk0L/UpTCpPjWzjQyhjkFQE6sgrDkr/Gd3Azde6CCiFYjVjR1Zvr2rJkLFRZb7/zndz/lwlorbyCnSIISvJrmu4DolowNuq2/Uw2PWFs1LzW8k26l+kZSxmqs3MVTI6XW0fiwfKvoI7+PAoWNwTcGZa/dzJ/pudtdVHb5DWIwE9gJZVncGezgLtMf8XmeZ6Wz/Taa6/9x+0fnf8WqMPio20AAAAASUVORK5CYII=',
+     hair:'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAG4AAABoCAMAAAAn3DXUAAAAwFBMVEXx3shYMBFaMhbq3M9bMxNeMxmym5Dqz7ry4MqObF3z3szFtKlySix2VEeghnY4EQVrQSHZyrwzEAONYTvXt6Lo1L0+IgxsQh2bbliTa0ajgmDlzrVtQCB/W0jLrJAAAABvQR5yRSFnOhiHWDD///lKGAJWJgyTYjpcMhFRKg/v5NZRKQxUKg1jOBjw2cR9UCoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlZplUAAAAMHRSTlNkmiToWur+Ip/9H/4Z/fzzYPdqGxdmItYLhlSepQ5jAP79/f3+/f389XD8ss2uL/6/WggUAAAEd0lEQVR42u2ZiXabOhCGxWYWb0mTLre9LdIAMt7f/+06kjAOMdgSCNrTk8nJsUMwn/+Zf0YyJumkQT5wbeFu3Ulw/nEhaAD7L+PjFk4JT/gQAIAj9LnuiDi/LAGOaepQClQ8eQnAWYyEc/clMArgLgQNf53UR2rp4/+eAp1i6uJcJ1iIDCKEsmNQ4cB/Eg+lg+kty4NvC4ciKEKYgImgMlDpV2RSBsdvbgm03NrBOcAyVkrOFSbgoJ4B/P8ksY4NnKQBu4YUSWuuRMuDyq3DcHvYZFmmhElW/XtlKTRjwN1huG97GmebTQZSEL0fWE3uD8IJbRXtMU4AS38AzoHNRtCgUaoOrsryHd4j3LbWRquCdbIqIJ4Dfk+cW6JJhLY3nqRNnQ21qldo6fbCuQdkVZlkD3Q1oot3H7dnVd1op6yO2PfAbQHrtsFMXhtZL7D/fGOcj4XbbChUrV0NTC0aY4FrijswxJ2hTRbrbruLYRxDHKZS2ORdW3UKZE157W4hd3pAiGNtuEa0KsXjrasDubsMoLjG2FdNzIs6OIdLTzZkigPgGuBckOIq72PjZWckBZxzFs+uEbNA4Dk01kHJb5NHusVRQcsuCwsgKIhXM89L87eBp3rzOF5yhaxXQvwpF9q4n5gjTKVY5vCVvAiy1dzbqcvfBh7feaug4CqTyisMtto4H0D4BCcmZZzHs07SG2Y6j3nVNkqho4vDjY4Qx8QqzmPvIeoC9AKoZoKI22ySroGCOCZxfKnHUsB5wWi9zbidZKTLKKJs0m7Fs8nON485q715m8123MtB7L1kUvjSbFsv5NW8ox7uS0nRI9JfhWf4oYWB2pi1djrp8CXLVPfwODejXapngjsCO8uXAN8Zf4ZjvHaL+GymgTtANX2LWW6M89aXLcutV1pxL2VlZaMmqNO5KupWOOrg/GrIg7FPFG/Jz1Wra6nbKty5mOd9cOmOV8W72SF1q8PCxf1olTvFNQ56ONEEEPS+fSJni6jGQTeZ/VxZh1pv9XCOOHeAOIznNTXDDRKX5rNC7AH2uskEPuzul7ALg7Um7szjfCBvWd7ujlpxnxBntsy1xaw46yXzE+C+YfjdxIDqqsuKVT6Uhs1H/9OsXb9p+X5h18N9Bxu5xNEJ33VwIePDc4mxDH5p4F6Tr+tnC7R8Wfx4B7jBvRLvOV2tbdznzmPhAHIXF8mJYAWX7uRG53QHp/7eLT07PGWFbpz39jw7kUeduHG+xTiNfH3NW3DhtLjPI1HCvwI3ViWTadV16DmNA4m60ueNrOnPfjt5GplBDO5vWlBEWu7FjJg/0tIiVoGnR8lL7AkjiVatkoTYnCUa1iAWm1vjqsNbIjQSEU3Q5hYdkxiWKBlBBzGs9cCsjTSioz5+D+0W7qG6sOf29tSzm8PJGqE/L+qPS8PIIk3HmWTCZBoKzB9ckFh7U1qjiKQ2ecTW+9ZxKAktpukUPdjEJKld252IN1FR6pz+aCFG5NVmI7wjkiiKPAzV0SS03XcTt/kH7gP3z+N+A0u8XvhwzCz9AAAAAElFTkSuQmCC'},
+    {w:110,h:104,cx:60.5,cy:70.5,fw:63.0,fh:41.0,
+     skin:'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAG4AAABoCAMAAAAn3DXUAAAAwFBMVEUAAAD+8N3+7tv+9uT46dX459P459P36NT25NH57+H98Nr78d/79OAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC+V6ehAAAAMHRSTlMA/v3+0rFyklj/sMnZAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABMV0R0AAADl0lEQVR42u1Y23acMAxEI9gkbf//ewu+SCNzSdkADz1WcjYhAY8lzUgyw9CtW7du3bp169atW7du3bp1+58M+iia6KNogmfRHoumLmgz3kOuYcZ6yj2dwUSyf88EMtsMd697mlxD8mzBuzl7BQnFtxuzlxzLHLHc4T73Cgikuod8hdvIWOkohSzJ2WtL2degC5bOXwVPiubs48J8pYSJWcldIWZJIy6EYjApXAF5t9iXXpEtR9IAKOZeJan+HAoUsmimu+rj23hqufIV2cEqhoICRP9UT7tlewa5E5NH7Ky5RHle9fe3lCAhRyqso1ndcfDiKnLPnX+OB2B/1OIOd8qg0HAFEpIKDidy04VOu2ij2oDjHGfmtSxBLV4o0LANakbDQQLVqlAtvxYxRB6SzE0ifFtN+YEsPtWKAmB4MAWH3MFkh9AR6pWJB7qTvamkBEqemXj3zO4FCI9ED9mbcAK9PWxNNFnhQiIxfxCuRF87sUysUw/f1tLLt6pSDWOqhA2WR/RjC+6lvC/YGtGfEiIlavqoIqw8S/e2FD40raxC1Uic2XB+qLtroXSq0P+OqPmhnry4Vt3/WnwIRRoeDKsOshdMGgma7IUmWkPQ7sv7H6+Rbt87VqTEKunbxUajArgjIFZsmifqk/u6A1iu5cppxsWCqRKEAKtn8GJ9cLRAgAtiKutqM6uw0GjyzH/Q/Zbg8bLm4zy1YjHDgforD35CnTE/p0cNaCnjsfLZp0nDJy9ptlF3aX1i3tTrqLm+NJlwWK1o2BgbRG8SUdDMmUknv74bGF4TRs6eU6XGeGPyix0hmcowTv980g6AocuQ7CTwN1weNfGNHNLICm7sGx3BGhRCUTv3SoYaZKhoreyojHO7O+XcLAmeZa3JrHuriNPI1Tpfnj+/Acxs+PgaqcKOVyKfdG7JHjGOO8OKmc2skkVx/jVQrCqeoHb0g6xq5vkzwqdw96GCH6gS4KxjHRaub9nSDBJAM2fyGJhvfe/8oyRz2WCKBCZZJt893intmHkjoQdQ089o4/AungYtgc4LYfBjnr6Plhpgy0hgBScuc/kJWqpmCB6WMqKt7grcztR18ggLa6qUutWhYDnUXfAGnWcjrIuY1+9puMAmKM+4c9FQGvxQNfKzrAVAGSTWGOUBOL3pO55KznuoKu1x3YSt17/oGxdARRxJ0lSCabjHoMXEfrn5dfc01pP7OI7Ta+jWrdsJ+wtylhRZRfeedAAAAABJRU5ErkJggg==',
+     hair:'data:image/png;base64,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'},
+  ],
+  girl: [
+    {w:110,h:141,cx:55.0,cy:91.5,fw:76.0,fh:43.0,
+     skin:'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAG4AAACNCAMAAABhVb/lAAAAwFBMVEUAAAD+8N7+8uH97dv+7uD459L46NX238725c/56db47uD98d8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABH5AiRAAAAMHRSTlMA/v79/cuxWluDlqkAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC/ySw7AAAEUElEQVR42u1Zi5LaSAy0ug25u/z//4YZPUayTdawDpWrmq4sweCRRlLrMWZZJiYmJiYmJiYmJiYmJiYmJiYmJiYmJib2AD6rjp+VJrhUHT5p3td7/3pDL+CELPKDvmzqLjOPp9RdpQ9nHEW5yps4IQm4zDqeYTmu8iZOqbvMm/y0ulOCeE3mtaD8jequcSZEznAumGm34l3jmjpus6yi39b19cv2tgOn8jVDpKkT7iHlQ7FP2v1oa/rC3+rDoisft6P/tdcO6n/tA/jbJhb2DZo+/T7j97X94ZHmO33pSvL6vvPmKcQWeulySyiSd8e+nM+mmLY0WxI2iKlsVmNVmckIwlyYQN/Oc/tAqasQ4pJ2JNG0jSBZz1W2u33w7OdB2JJpcBnZmS1SI3bDDOydCYtH254c5K3SSlepWHMjTGMLArozczSdVF0RyxaSqx4ib7tcFo0BTYhuGsrQ5tHVuJrtK5GlK9J3LIzedjQZmwyHCkN80L8mBzy2bXNkiXliFHHfsLKvCFmk2tSdD2NldyiH/n67qQArpTcXtYWp4yKbBkXMOpgCJGuZPIrMRE1cus2226Ttv0pvcQViJVGZZgTq9iXiImeg0TJlqm8kqbtjOJoS6hjmGGEQl9DSA6xwy6VEbiSqyUvB+3dhFJDBf3cqwr2uTZKrgzsMIgd1BOFp7PPAOc/BQBeWtrPC717DcanKbYocDpy5hGGDEsN55rtVUMtMC+eK+lEhTtJXmXkDEX0gC+261kRQlLQK1qYaOlLfqsVB34Omjjcgu6uExvMAHkatPtxQxYtSKisHbV1X2m0RAqaqZfTMzoL3WG9w2dL0t6uZ2g+svWI43c1jJEJqgZn50Eq06Xt2H+TgINBz3TNwpLlARjvZtIQyK5CD9sUBh0P4DRYHwaC30zL1u/Gd06AWNMGInG739vQwAJ++UHyZSmaQXQsfiBIrZPq3vsrln+fD0Q89hmZqIzxslpVpYh1NxqpDag3P7CpOzYNO6m8loQ/qYzglhfbUiUcKM3NOPa5Whm+ZWynH8DkMPqPuBu95KXbBoV2rZqSd9luMkfZ++hQymD7qWa5YaYD2TudTDp2bZ09EWLfVkxLtr05ca50Wyrh7/ux/mMdF3KiQHNXxLW1pgDdjyCDIGk0hzfhjSOfxMPSlvhGiXTNDqVrHxr/2wJGHdXHTPZkMo7nAL148vKb+mh0mOlswHXP0Wk+UgzKvntO9daCMqNsOo6xnTnW+GrhsH4wplN3pb0sVI1XP9vcehZX6W6zzg3jWTu9I8uajt3FqljJm2z8eWEt5+7E0Y2KNpxBp1CaT2dQDF7+hTR+gJJmSz26k1K+Mmd/9/WMjNKkqp0atPN9+UKXVnqFxqB6a7QWyfB/3MvwEbzJ9bGy5L9eAOdm56wr9rHvpr0A3GY/WcomhjkO35XLQRolE/WvY8bVOP6zwT+rKzp0/kU5MTExMTExM/L/wC/fAFxVlCNkZAAAAAElFTkSuQmCC',
+     hair:'data:image/png;base64,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'},
+    {w:110,h:126,cx:50.0,cy:83.5,fw:66.0,fh:37.0,
+     skin:'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAG4AAAB+CAMAAADyU9RSAAAAwFBMVEUAAAD+8N397tv+9uj46dX56dT27uP459L26dP659L78Nv58OD//OkAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAdG908AAAAMHRSTlMA/v3+isj9bF6w0a7AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB0DajAAAADQklEQVR42u1Z15bqMAyMRrB72/9/701sqzltSXvSHJYDATKWNCr2DkMikUgkEolEIpFIJBKJRCKRSCQ+AT1Lh0fZ+Fk64Fnj8CgbdXR8ry9pz7or+ZkI/KBQiIifDN2DfIWtSzzme33ZWfd1XyybLyMB013SrMb17kTnz6vpYjKMdQbR2tN8XEXRyKbkg7s88jX+8fmL+2B+LiaOvhzpqHBwo6PytqC8Gr80oWpp5Gdv8k5PGX/GJhSPRkDTB/ahJy/8+palqfAWW4sNzdiIhbY8qD3batqayt8Ucd6vu1MTYC8Ud0Ou96wWguzdbGGVT2+ILTmieB7BjcYK8RY1MyCLai/QTKx0hQ1bxtXvQQ2rEVOHSQhJbytPopx6oVlXvr1lXImtVwrcC3WohMi82UezWQci7JZJDrGD53U5ECNm/qyBLYozO9fKJHXWiShZnQUJKDphqsebdYwf0sXUUmk24wjiPM0Al4HOmfXi+uRlt4ipbHfv/acJJ8YKPdfxYyMRNDy0CmDODrh1WZ5Wtq15xxRu/iuCBLm8Fr2TJnyoLMrHs44yG5sJa+axVwj8qhCTvPfH5pgefmG+Qu9Qs43grkvFkfLSqtSGfUspFZJd1uMdIetEvzDe3RhgRSuoueeqP/UL0ySpK/lJs609lGLtUtE3OlfKsGB0UcpPO/ukKSZaqBlkSe4iB98KxLbPxz4nCMT+HYSI0JqwJ/9FOl6TCrqS7RzpG+ORqZZmfQiumweF9gXi6JwZ0ks6gk5hUANjzzo2tC/UadGltRoLn7qAD4/RkKoCmDO1i5LWPT9ZHNjTMxbywJUqX+r6gebELiE2WhU7EJXpcuTgtow7UWputcQO84mTzdFdJ0Kz0VKvXSrKU5vTuV3XQkdwJVr3LFpsTh1TdZnnhzHlMfni5EETh3nHDa8mUHFyvXJyc8noSrKJxaYk22id3sxy2O3YWOS3B0J2wUnIvyE06m5T6ccj8J9LzjzYKrJzpW71mtVMr6vOiFmdqFN7sG7y498Lj5CYtZTYKYDRM35feoj0/a6MMCcK7TgEvW84thoZp/EqHjTwuLF4DTfh1zC8J8c2jIzv4X68KvLfOolEIpFIJB7Bf0C+EDOgPBV6AAAAAElFTkSuQmCC',
+     hair:'data:image/png;base64,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'},
+    {w:110,h:137,cx:58.5,cy:92.0,fw:63.0,fh:40.0,
+     skin:'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAG4AAACJCAMAAAD6xP3zAAAAwFBMVEUAAAD97tv+8N3+9ub459T459L25tD46tX/+ugAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACYzAjzAAAAMHRSTlMA/f7+ss5/nrMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAT5O8gAAACp0lEQVR42u1ZAY6jMAxkxu3e/f/FR4Ek40C3i8MineSRljYUMbE9dpzsNCUSiUQikUgkEolEIpFIJBKJRCKRSAzCLH3wv/qSn2d0pXW815n30vHW2BnulQrudebd1tkPHH4v3c2xw5XK/Dj50Tpn9dOIbxPPFjYbcq5NaCCJD9g9cTper5cs1xcdF8rXhWW0EhDtzsrK2VSephO2xreZAn072mTW+8slYB2hBnR36mD51fq5nKYr00f9UowVVlRnt7txOnj7yk3KH+A9jbB1VGWyRZO9Kisd49aVeVZJQowghdeKQtAei1u3aU/cu771wJnLUzO7haxriVDmDXQhFKlszuaYMktqiyAJHcOn/WJegK4JhCXRaiTpndmMX360mHWEVK1qIqtxLnZseorErhcDNDNcOpiXynBVIUU57xNP6vlAVaEuCVI4PF03itGJjw6XNYh8x6qKSLELXrXTS2UrrevFIlJpwVKt61dP19Y/CzuzvLzpQXP8OHY2LhU4YztldkOLVRUpG6z1pVuEDhYgWFyZtWbKeo3ee1K0Y3SuTahVCr5/gOvUqlRO99TislIomxsJt6pX61r9jtOV5cDLATxa76JZbl1VYd/sCb+2RmVep3f/u+hUgi4noDm5KddO00kntu9VDqRSa8o8nP6ePm3ggd/I9wuQ3I7svrwtrA2KLhDSl8ksYns9JwsXvc6XXc0M7yx7dcOVmn3TvgwHDgXMvDCFqytq1eChIwijU+I3UimeHDsSEH9h3z1D2q/12wXHfUBbxo8WvJqTl5zlwKBbyYODgTVNzB6XnKs8aHRFZl9V5v0/n1ceUxnftrVzq2B4TJcCy75G7ZOe/Tn9Al4Fw1zmW2BrdSqMzxflhpn5Of0+vv48ZuS/VxKJRCKRSCQG8A+xyQ5pogOweAAAAABJRU5ErkJggg==',
+     hair:'data:image/png;base64,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'},
+    {w:110,h:126,cx:62.5,cy:84.0,fw:69.0,fh:36.0,
+     skin:'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAG4AAAB+CAMAAADyU9RSAAAAwFBMVEUAAAD+8N397tv+9ub569f459L35tH27+P/+Of57dn/9uMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAsqhlUAAAAMHRSTlMA/v3+0a6U/sNYtwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADtVhBrAAACxUlEQVR42u1Y2XarMAxEoyTt7f9/cMGbRsakxFke7tGcUwoEPB6tNssSCAQCgUAgEAgEAoFAIBAIBAKBQOBt0DBBuO7N89SPytNPTnKW79N0Hw2yL0z7bupNYDNowsZ+ftbbi6d0OndBsGI9yIZ01DE6NoHpvM8G/1rl2VgTLwryLZSDhxjdKlTOmWG7MGF5/Hy1QaVC80HtEkwnOBbID1Y6FAZPJw5JO50ynRzGjXZ00myVWaRat50SYTZ4PjGG7Sk9NCUrV2dLjhl0XGTx8oCjkyNxA7qkr8zZZHTiygzavUan6dbXkevE05WRC0XznYuSMgcFkzc6Rz6gU0cnbKE6YNGpnThKT08nZ+mqrD40IBz4xtnmoyfYUigyXeeVJEqLTtPGp70x08uHdCuDVSStlcSKSxqZi1q6oxyWJe3NXof1Onvb6HxssyVlZ0ywVpC6+2luRVO1haW0hOhj0+fCPlTu1rCU6EwHGszl1cBto0RQ/NX52JbYVSlKhOwjTX8wQ3RV5c8OiTGd1HhUI2v/e+PigSb+j9Mclcl8d1AvOTIxsXYoGWepbkUMfbrRzHy/e4SOOoKPlIFAR42p9RQ4yK23U1wMeSFTSzi01mOaqlIdt7o+MB9TV1dA4n1HfZ2Tbt/uHlXHjrNCNvAd2MYzrlu+laoK2KikdGDR9bfvWXWwNU+ZfldCLA+ssv3MrvWp/7jEO0yC9PPk1oLzHK5g751oZ0/sejn4wb7bp3aLyss03U1bgXLG5JLVWfcJtmW5KA+adwbArsmZEZ5iW5ar1o1OE8V93SUdrwWmIcJbKSqavqqkVZwsz+OitAWqYTMszJflJYDKLlR8KVnvvERatagan1s81FWzvkpaCRmklRmsZrLWF4TIwKSqfnOeT14sjCVulNoqy7rAXyVf3/k173a7on1xuN7iM2wgEAgEAoH/Br/q8g2b43dd+wAAAABJRU5ErkJggg==',
+     hair:'data:image/png;base64,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'},
+    {w:110,h:145,cx:50.0,cy:94.5,fw:70.0,fh:43.0,
+     skin:'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAG4AAACRCAMAAAAVQX0FAAAAwFBMVEUAAAD+8N397tv+9eb769f56dX46NT67+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABlZbfbAAAAMHRSTlMA/v3+1I2v/QAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAARrQTDAAAEiUlEQVR42u1ZbXubQAyLpbT7//94gfOLDGQLDdmXnbu0e0pBZ1uWfcftNm3atGnTpk2bNm3atGnTpk2bNm3atGnTpv3HRv5TOPxTODyB+8wiYMdwxEcS9wwO+AzaMRw/AMcF7RgOuJ5BDxeewOGZ1++R0ha444waLkfD6sXhlau946/lkYfeLWiPr8LjNaS0w2COENu10Rw0eXx4nFG7lJtrwI5iORJqjbK8oAYG3Eas1rrfhvltQeORD1EB5rmrS++G1QNp2KMNUloryTfhIm0dzjVtFB3Uc5xtwbwdOLEpA45fDDCP6c/aA3d0sFHk4tyDNl5vUXh5+Z32QH1ikm8pbnJBDBIxlYy9P5wJLDkqAL0brGnjwMhIPn6uNbDAaeZPzFpebkGIpiSWTIlgr9qyLoFaRPzjjCVwQNEgvSswV69InSwAKqk4IAfhasAWMrieeIK82wzjI3shABC05h5sN99gdYObIo0wOt3X28ZjuX64/qeSh4SzEmyvIu5EKllM9zZLyp0LYHd0fBt/ZfkJHkMkAr3XO/XoUoGF54DQQDKouXRVcRSHChsMCOqqex4xxmWmH+EUrPGD7FwRDzOYTivbBPdW2WfkGblq00JIlxjBLN8rgeGeC10kv0mwr9qiprtfjll4CSe/X+rE8gEjfKF/rRhaOjzdxbdkibUCY9PMXJBEA9kzbKO2njxmotOt+p40BSR15f8SGlplMlPfu5OPxxBimRaBxLVFM5kpA4THUegaVJBoUnJXzMrcORpNyVm4lZ9agmVxRMdAg4PARfws/TS93WAuKNF1Mt+GXjIib1oIRDEN4pDorm0iOZpdgxMZUP/2W4vwgclikwrcVbnUu1UoSqFbfCP5u9kUEA1KNm+mkYxndQBdDQqwh7bBMVOGZGiXr+pqsG0ZNB2txbb+11tCk7xys2YtKC4lli3SKGr3JsjtwCBrqVjmkKJsKFUhO21hPZbhLXfz0X3lGtM7q+hCykcx6SJbklf9rgj8bBC7rwCiY9GqWlhGaGyjsdj3u/GHf5v6TETMoM0sPYBxJ5lQGai8v7i3Mh0YgCeFB28KG0Wo8nlhojV2ZoqEqgaGCun0VyV0vPU8njaBrmbS7+gPZUxiXcRCZqMlvTKvU++Rf6KI7Gpal02Gj1fPBrrEZDC5TaA0T5WQTMOLuzywiWf1SuwkrIvYJukn91hS4L0cuo8icDK0nzj3+KokoEnwXliKkVsRO7GlvFOl2trqe+OtoaZGm3HbufPt1vTa5Hew36oKzdvOHQZEDWXW9oNmHxZqOARw/vhvTPDWYtpUxVp062SsJvbzeNIAaxTNbYKxthF57WdoueuDbGs2c0puYnTAW/daP8G7c5wsyBxv7aShdf9y7qdHVN8mEcUhVbQ4Y1VvHIeJDh4Omi2ta/9+83RR5hfsmZk7T90hv/lKi21/B53nIPuyx277fs07tE7STTCdjTf7vuoo+j6ad3br7czM28VvLb4WB2jUfuRh5Wfepi2jKMPWYWU13G8ftpDH+/fXfBk9bdq0adOmTZs27Yn9BnQHGAD+NdQ3AAAAAElFTkSuQmCC',
+     hair:'data:image/png;base64,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'},
+  ],
+};
+
+/* ---------- 顔パーツ事前合成（目8×口2、男女別、ユーザー指定座標で焼き込み済み） ----------
+   なぜ事前合成するか：
+   髪型ごとに目・鼻・口の位置を毎回計算すると、髪型の形状差でズレが生じやすい。
+   そこで「目×口の全組み合わせ」を基準髪型(boy[0]/girl[0])の座標に合わせて
+   あらかじめ1枚のPNGとして焼き込んでおき（このFACE_COMBOS）、
+   実際の描画時にはこの1枚を「基準髪型とのcx/cyの差分」だけ平行移動するだけにする。
+   → 髪型が増えても、対象の髪型のcx/cyさえ分かればズレを吸収できる。
+   FACE_COMBOS[gender][eyeIdx][mouthIdx] という3次元構造。 ---------- */
+const FACE_COMBOS = {
+  boy: [
+    ['data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAG4AAABoCAMAAAAn3DXUAAAAP1BMVEUAAAAnHBn59/Py7N6rqqnl2rX7ubhcVFJlXlxtbW2koJ76lpH/fHzwqKTo3rBDOjcAAAAAAAAAAAAAAAAAAAAFQdCGAAAAEHRSTlMA+w1XB0kH5p4FXPICVhnw/Gdc5QAAAnRJREFUeNrtV9GyoyAMDQEhKOr//+0mILW19s6A7p3ubM6DpQY4nJAEAVAoFAqFQqFQKBQKhUKhUCgUCsUXAhdrLWLnYGuHxhGAF1e7tPS3CBcI0YG1bXSX1IGH4RedCQvYXw62v9b5K1Lp2nAXIbpPNoB4pz8wbo2TWR9v4l1sosqOAOOJk+S/mO5TF3nOYARhPGYI/6dsMhTv0jYIWQjyJIyvbK7YTLHFG7TZYFayyC7jWY/mkV+R+JrebT1sEVezyq5lFQd1XB6pyHNCTP3VCBcshZOXzbNkT85Eb/1k68hS4RslPnmcbWa1eaX8WNlJblyNWbkOhvEl4CM42TVZTnQcNKHGD7aXBVeSydTwY5dioGN+VTrWzdQumy9UeJIdgS0P6D0cckyOIS8qbGaH/QeCTIGmomqv7qJqCCLJjDV3+vZuo7PhlS69qtvoSl9Zix16SzrJREe6Xd0zXY6qmJ3Zk9/5MZoVn5wpmeBRFj+gPziTQ8UXOuhUl5dMT7M+xV3+pX0dHL4EvXu3a5TsxerNGNMjzD3KzJuB00ZSxfXQPfk+Iq15Bq7RAUrZ4JLjF9wOwFyfg4TkWksc03UXM5CSVGqT6PJzjZIk7fKeXyXYk61dHR6UPmrJPM3Zi5A8TJM/PcQdDm1f0bDg62m+xb5nuokl+pRSbqayHNz7SWMZWnOczxZ/CtaEucFs81kH5x20fdbylQLPqzomnKYJZj8zLbv1w/AhNe0dDvYzmCgDfujTGpkf7zDi53mG+aczrf28Y2/aXgz3fvSjBOYX3SOwp5ogug4gB2/79e7K/RWxg47P5D4s+M/dDxUKhULxP+APeFQQtOGrmF8AAAAASUVORK5CYII=','data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAG4AAABoCAMAAAAn3DXUAAAAP1BMVEUAAAD6+PQnHBnx7N3n2bL8uLdcVFKrqqllXlxtbGz4j4mkoJ7p3LH/dnZDOjfvhH4AAAAAAAAAAAAAAAAAAACLwn7QAAAAEHRSTlMACvtYTQjmDp4F9VwZAvD2VMNpjwAAAm1JREFUeNrtV92aqyAMTEAgKLrv/7YnQbFqtd8B3X57kbnobsvPMGESAEChUCgUCoVCoVAoFAqFQqFQKBR/EJistYiNg63tKkcA3lxtqulvEW4QYgBr6+huqQMH3ReDCQnsl832a53/RCrdGx4ixHDVBhCfjAfG5Z+TWddf4lNsosoOAMNJkOS7ND2nLvKc3gj8cMwQ/k65yVB8SlsnZN7LJ2Hcs4W5zcxt8QFt1puJLHLIeNZj88A/kcSa3tta2CJOZpJdyyoO6rg80iwvCDG1VyNMOBdOXjbPkiMJRG/9ZOvI0sw3iD95nK1mtXml/DFxkMIwGTNxHfTDzvARguyaLCcGNo0v/sH6shDmZDLFfhxS9HTMr0LHupk65OYbFZ5kR2DJA3q3Q/bk4POi/NIcsP1AkCnQFBTtJVxUGrxIMkPJnfobxzKlMFi/pxv36ha6ZWlYf1kpVpHl80RHupe6LV12VczBrFeX2SLbe8JNMCUTXJ6tQ3cIJlvFzZlQH8yVdBIK2qgrvst/6bUOti8VqzSoK8eKZC+WaMb4srlICSWanDaSKqHFKpu0iUhTnoFrtIec5eOIySUc2TF8AOb67MWSUylxTNdczMSjS206nQMzmPqVbPXq8KB0U0ucW2+TV2cWdnW3aEi4P82L9xFcvyIz4rqm9S4TUlebdHy2uBMwaf/T/2T0cNbDBReg7lrLT4qLnZKCsvD1fbrok+y27vzH3mFnr7HG8kOfWmd+fsOwQMBLCQ1pnqTSNqJrrirn76mR4cZPl7dv3vJD/XuLM33ERkA93Z0HLGKqHsJ8tmtCw71PoVAoFIrfxz96Gg/bLvEc8AAAAABJRU5ErkJggg=='],
+    ['data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAG4AAABoCAMAAAAn3DXUAAAAP1BMVEUAAAD49vDz7t6qqqrm2rX8uLclGhdtbGz6lpFYUE//fHz0pqNhWlj7zqOopaRDOTcAAAAAAAAAAAAAAAAAAADh/yNcAAAAEHRSTlMADloERwf8BfLoA1ei81jzbGjMVQAAAedJREFUeNrtmNlywyAMRREyBgO2//9vI8Brij2DnEzzoPPQMmW5uiAWVylBEARBEARBEARBEARBEAThBwGlNQAw+4LWrX3gWbi6qT+1NnxBirWts37ozrfptYb3A8n2rcaC8H9pbYmrdLXqppIlto57s2fsB3dsFoTakLYIIjwWWW4gS8W5J4appgZqoLp5OJ7QjRfCcimsamm8xDy9+4O9sj9H2u4Ol/hjGivGIfvDN3MxOYvJ4SEY/glPKbdMYy6ch0E10d/0UjlvlQiavYgU+FQmlZzgvj75dyyVpXQIo+OtHf2Y+5KdtL22Ef2qmgzbXIl9H7dYdMdI/zJdMw1jF0O9OrrLiRJhbd8P+2QyVm1NvWHJAVIo8RvoxnHswBx2o4U4bHudMZlw+SijEMbEKf/KNgW2XO1iT8Fbn0YlteTS02lZ6dMqd9LA2sPJ/NlasK/YA3fvSiass+tTudqK5D7z8PMquFCevN4o50y1Yas7fXXqGZJzZNF473PRV91B1/poVwbR1CBPkAukFir1iICq7RDDyw8g8OCcU8EEkqVprXdvv39uIKHMXaN2vZvLPQQV7u40xhcNHbRcus8++iEl5g99RzDmMp25yAAoeZVuX7oH5oAhR3cyj6f/SBAEQRCEr/ACUHAMIsKbfOgAAAAASUVORK5CYII=','data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAG4AAABoCAMAAAAn3DXUAAAAP1BMVEUAAAD69/Lz7t7o2bElGhf9t7dsa2urq6r4j4lYUE//dnZhWljvhH77zqOopaTui3kAAAAAAAAAAAAAAAAAAAAcZeNLAAAAEHRSTlMAC1pM/AgFCfXoAqL281gxVMBTiwAAAdlJREFUeNrtl9mWwyAIhkGjJtq07/+2g0u2ZjkH0p7pBd/N9IzLDwhiABRFURRFURRFURRFURRFUZQfBMEYRBSuRWO4a/CeuYa1nmY7uSDZyltsbnoXeXpc834g2b41WVH+L609cZauHi4GRWLTvhc14z9YsUUQj7b0VTDgbZHWgXzeryOG55EawkBjMKxvaGZDaE1hUsv7ZeD57h8ug93WUr53odmf8l4pDcW/8OZcyp6l7OHKGPkNTynXwlh+bLcJ8KT/mTa4aAQ04kMkw581qORJWM6n/E11sP5amWEF/b90ZbK7ZieV17xjnCZlh30ZDF2X5kwxVpYqFC6gbXxzqIO1dyVREk7n1Q1LMK2gEFrqDS0HSKHa79CO42jRrarRYxqmWqeJVl6AuDdkzGzyr5Yp3vBu39j97DepkZeQb8uDtdxU2WiE3Tsr0rsQML7iZs1ykYUbwRRAcp97+Dn3qrjXuRyvCk5vPQpjP1OO70gOLffRDi4Et4fyr3/0j0IPBxNoGQZu8M8/gCg9mh55dzKH3/3MBXMsz6cAX+9qlBykY4xnweGXOeSbVoiV3yqHpRAJF6/q7rvfMO9yhq+GEYUAX+7OB6xgae7mxooQvPsURVEU5fv8AROnCy4wIPQdAAAAAElFTkSuQmCC'],
+    ['data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAG4AAABoCAMAAAAn3DXUAAAAP1BMVEUAAAD59vC0s7Pz7d7m2rQnHBlxcXH6lpFmYF3xqqb/fHxZUVDzpqPm3K77zqP/+XwAAAAAAAAAAAAAAAAAAADWS9VSAAAAEHRSTlMADgVXT/wG8Z4OA+RXGPMC6jja8AAAAfpJREFUeNrtl41ugzAMhH0JhCQk5f3fdobQFmjo5NBN0+RPmkRnyHG28wORoiiKoiiKoiiKoiiKoiiKooDQWTQ+C1gSPgs7XXlda7NMjRDa1TLrid4O5K64Yz2RHOFq7SW3d2R+szOvy/1vdyr3Tg48EU29ARxdm6UVOTQ0XLvcPG+9P5m+hiNX5ZB5aX+mC2PPjK96Dn6OeLjtlgCpnN2NvIw5evLHKjkqav0mwk+K5bDLJ+YxifzR3Gqbr7bGhUvmsXb8Y5Fjj/bFXkml790zYmA/INePPe8VZq3PPbhGdnI8wIXaOTL9Svlv5L9pTWbR61nDPHrFdvLa7SbCWAb1z+7bNea+aQ3k887tOsKsE2Hu94Dudrt1y/HiEdk+0JDMgzsYT6NfPLGN2wwmlHSyZW+2zdggVzvRLUbjLMNqs8tYVszjNPuAnHsumWwvh4xdxB3kRNWzZxsQKKS7lzjxdfUuqbvTd4uUhsRZnKYpBhqGUF+zIXTHrVENBJYb2GKIMS6XkepyomUl890ZpkIw7KlEWC3x7xeQjXRjzBb1VR0RwzBQCollOa1nbzvJagd7Dgst0NkNkH0ilI+Y8zZCSpTe7WkQHzJ4M7etdJ890mBuzJ85Jf38F8LjwFGdCt8Bbl4StwouJAtokOM9uY2MP1RXRVEURbnzBVmWDJqA9ZGMAAAAAElFTkSuQmCC','data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAG4AAABoCAMAAAAn3DXUAAAAP1BMVEUAAAD59/Lz7d3n2bG5uLgnHBlxcHD4j4lmYF1ZUVDp27D/dXXvhH73pKD7zqPui3kAAAAAAAAAAAAAAAAAAAByy2SqAAAAEHRSTlMAC1hTB/wH9Z7kGgL2FPMxajYwcAAAAd1JREFUeNrtl91yhCAMhZMYEaG47/+2jeIquupMoO1FJ9/V7vBzOCEBBDAMwzAMwzAMwzAMwzAMwzAMBOwIK8ciEijHyogWiIJSDVO9WhA91eoQXIs70VPJAbbuvaZ7B/yXmdku97/dmdyTHEoh8nUCOGir0gs5rEi4erm5br2/KV+WllY5DHK07+HCsRfGTz2Hfm7x6MorAbVydJh5mXP04M+75CCr9UWLjFTL4SGeOM8J4M/mVtvyqzSuPDLPeyd/FjnxSB/2cih97/YWVl6X13L92Mtdwev+vBvXloOcTKANJu1TOuB+JccpFsHMer1o8JYp1DWmypgn9Xv2HRLzmLSMenelmthbC2HO94TdNE3d8rzYWrjITNQH8/y8Yg+jXzzJQqaZvCAJp1j2XK6uyt3ni25Pc1ETl+8T81xm3OpuPYTztDFiSAHjK+4t7iSnKjxqu4C07h7XltIrk153cqh0J6lxt5A0bLy370JOdawE6R2QL5CCG76Gr4UBOF11Cay9GENxphyR9Fj1hiHc9GHlF4bkOt2zxfKuQyD1F83zCDEoa4r3qaL+qsAng890ermnvU5RSPHH6q7x0cVAejWMWAno5Qjr7SEG9RDRo64KpN95/RqGYRhGE9+FQwwMqFnKGQAAAABJRU5ErkJggg=='],
+    ['data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAG4AAABoCAMAAAAn3DXUAAAAP1BMVEUAAAD49vD07t+ysbEmGxnl2rV0dHT6lpFZUU/tq6j/fHzzpqNlX12hnJz7zqP//38AAAAAAAAAAAAAAAAAAAAiQBBeAAAAEHRSTlMAD1gF+kcC8eMRA1egV/MCojux7AAAAf1JREFUeNrtl9uSgyAMhhOjyEHk/d92E1DHttIZ0L3YnXwXrZbAT0gIFEBRFEVRFEVRFEVRFEVRFEVRAAc02N0ZYWhVuzPZxAO02A+E6dbitLk3gPvHmZJ0syh/Azp9XuxqI58Gn9E6DWO+Nj8iKGNIkVkg1iwiN2ZD0y+CiJtD0Y4FGy8tt1ZYUKy5X3uF5x64yS67GI8YXx0Qo20uC3/b3Elm2u4dlexAHmYRB+R15B/OevwsDVkpG+asQegMohyy4xghyy0jj/tuIRIiNFprQdxjPWo77l4Wy1rKo+bo4HYyHXFdJElwW22EmH8nmHpjB0RlyYQ9U/x2arANiT8luva4PAxT72Yr3yVdOD5b5BBfNmPMrkc0pZU6QrdnRBmCjrzjTYjTuq4Tun1r5wDvxaVvMT8mGCMe8VwFTHje6XguedMThUxmb7zIsJp46WsVdrrnmoxhznvbvdkYY5707lByYc8Sn/i55l1TsmCtCnkIc+BVTCl5B/Psrhei0Tu+Z17rOZab2UXnvc+Pl9EjavNOrBHpAkfsU2lhtcDvnzT/R+CaUllP9DjPMwQXWDZULtvUWqO5yNZhoQzUDKahuURXe8g6hwDh25nWft5Joe1leuiStM9EEvPZIZ+6u7VcjagD5OSFoT10N5zDDjk+k/u4NVVFURRF+S1+AILJDFc4BjVsAAAAAElFTkSuQmCC','data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAG4AAABoCAMAAAAn3DXUAAAAP1BMVEUAAAD59/L07t8mGxnn2bG2trZzc3P4j4lZUU/xp6RlX12hnJz/dXXvhH77zqPui3kAAAAAAAAAAAAAAAAAAABWVCPmAAAAEHRSTlMADFj6TAcC9eMWoFcC9vMxRPg51QAAAdxJREFUeNrtl9F2gyAMhgkSBKH2/d92SUSnm9gDurObfBe2lpCfQALUGEVRFEVRFEVRFEVRFEVRFEUxYMFDd2cwtlXt7nBbrC3ek2sMz5qoCaUo/w3unidV7fnp4RmtnRt/2fyIIPvgTWYyqWaRqFEMfb8IAJSAUhgWQjq1LK1mAramfu07PPWAIjutYuQxHQNgozKWiT6DdOKRtkeHS3YAuZk4AH4d6Ie9Hn3nBlESQ8kaMJ2LyIfsMCQjctNAfn9asAQLDSEEw+GRHrYdd4fJCgHFq6wOlJNpW9eJkwTKbINJ8jsa13F9WFwiLlPGrJmSv0eDHM+yumEdibWuP1XkKQ5pfcrKARyKMUnoCfzSiuA6prE4Exe45R0VIbh5nh3EtbRlgdfNRa5G7na1pwTbQGbmkH+Qdi9d0f1+9VvcpGbq95nWVDkrG9zqLWdOUMjvvFs/7/vlbp8frqnO4WoXivG9EN8PTSbdM6E2zXHcqC0fYlt0bA2AJ1Dc42t8CaPBeG7TXuS1+aT0KHoUXcUGW/do2mTrbHNZM3DtO7S97EIBUgC5Otj2QoCrAK9xt3eVYylkImbz1K7ySe9jmdt2NcjQiWmXs9AfXkdXPs2t6+L2P3tFURRF+Qu+ABWEC5CgDlvEAAAAAElFTkSuQmCC'],
+    ['data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAG4AAABoCAMAAAAn3DXUAAAAP1BMVEUAAAD59/L07t4pHxyqqqrm2rX8uLdvb29YUE5fV1X6lpFEOzihnJr/fHzwqKRpY2EAAAAAAAAAAAAAAAAAAADVBSkDAAAAEHRSTlMADlj5BkcHCOei8vVlA1hibYZW0wAAAkNJREFUeNrtl9uSrCAMRROgAQX0///2JIzd09rgDJdTNQ9ZD112odnuJFwEEARBEARBEARBEARBEARBEP4giEopxM6H6VlofBaH3pb0WlAItl8QDbTpFZJxm9rrIBWjrXaX593rp8DnoAU13D03FUUci33+58As3i+xpOcAIw+as78h/UVnllIQPAb3OXPQOAoI/tC71A95cPGHnpsz6YOOFC6QDXcJ6WDX2btftMcZYvsOOnJEKt01nQjoNbKaIlHY47g1zhRH1Ln+eGoCQ8OgAmUZgBPgx+Wi1wH04U6bSy6NX1guIKfUzyge+cty/BvMyV2Wy9b5jaYUj3sPv/RyRLzUDo6uzRkdmOnHSuZyh/hnxI98aRPDaebRc6rZp3r6oKnltVOkR1HxYyIYqls8nLvvN213Z14hHdmKlLMQP8yxdxrkmX7KzEj1wJFU4N40hZzvgQf926JpcGhDoGV42/eIlR0KIy0F72k28Oiu3dtm9gqYfjrpPNprdz4POOdq+y9dngYpmT0ZrGGRX/6BtrqJwKC7S3f80H8dclXT6SVjMVXlcI61py17d880d6SzPbsk8fUkd5XbE2zr9nXkTRbWtWyS5BqPtZVetiS3kkWbUsqXxeoZ0yjH+7axRcgT5gtS20o3GF7qWj8SsLyqY8J1XWGzG8lSWuvd0tgTqgoJZW5uaV6iq09wnrcNtrs9reMQnz8p+3ggzAS5MeeGnPhJ8+ujkekAqXnbP+9GPtkQO+RoT+5j9OtSEARBEP4L/wDTrg9G7t5MlgAAAABJRU5ErkJggg==','data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAG4AAABoCAMAAAAn3DXUAAAAP1BMVEUAAAD6+PP07d0pHxzo2bH9t7Zubm6qqqlYUE5fV1X4j4lEOzihnJr/dXXvhH5pY2EAAAAAAAAAAAAAAAAAAADlpDlHAAAAEHRSTlMAC1n5TAcJDeei9fVlAvZitw/xRAAAAjNJREFUeNrtl9tyhCAMhhMQggvW93/bJtTa1RW3HDrTi3wXe5hIfpIQQABFURRFURRFURRFURRFURTlH4JojEFsHMxjoXIsds2W9WowCK5dEAnq9C6ScZvas5GLUVe703i/f1zwanRgulfPTUUR+3wf/3mgOYQ5Xel5wCRGOsbXpT/bzHzlBDfjOqYHybNDCJveqX4oxjlsen5M00eb2F3kMPzJpYfV5tjDbAOOEFtXsEk8cunO6UTAYFHUDIvCmvpDk0yJR5vrj4dFQGwGEznLAJKA0C+Xgo1gt+gsnXJJYRa5iJLSMKJ4HF+Wk89Ih+iyXA5dZjSkeLL28Esve8RT7WBbtTmjHZ2+7WQ+r5Dw7fElX5ZSPHQejzPVcZrvOLi1gvWG9dgrvjQCcd3SFrn/mWl9dLS79BxW4pzF9BKcxM5G6fRDZnqqB56loqxNusj5GsUYnjZNwq4Dgbdh7vaEhRMKE28Fz2kmmOovAE8u/eELYLk/K42ZmpfKdh/w3pfOX/55MHIyp4ZGKJlc9jahKx+2Ewxj75DihJqiexu3Kx6RHPq4W+ay8L0QcCmuGBqZzF9cAKqju3ncOXifzMprLWFpIu6xU1IkqpSTc5vcBdxwj4/HR+YBV084kq2u9iUBC7s6L49Nj6Mr7/xU2wemyJ7L8iPVW/T9CA6QZ7SMa/OvV8o2ppG7Cq/HhXHLXd/BSL23bW7q1XDBRqBeznS8szUMldPcTE003PsURVEU5e/5BMJIDi3woXfTAAAAAElFTkSuQmCC'],
+    ['data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAG4AAABoCAMAAAAn3DXUAAAAP1BMVEUAAAD39e8oHRqzs7Pz7d3l2bV0cnNgWFb6lpFDOjhfWFbwqaX/fHxcVlSdmJbwp6QAAAAAAAAAAAAAAAAAAACTwZ8XAAAAEHRSTlMADvoGV08J2/H0pw8DYV9XObXjZwAAAmpJREFUeNrtV0uWhCAMTAGCoMj9bzsBtbW70XngzC618gOphFQSJRIIBAKBQCAQCAQCgUAgEAgEAoGACIMB+nbCGIPWLXjkrGlbbwi6n6x167PYmJBMGx06HSXSJRlN/g5Uo7FXNuxDXW50ICy/G7bf0eWtHXQWzpHLoEBxubKBJfL7siwGB9sZHTtu1QGvQu2MdfCnRWqhbjreuSjF9y4bIqd8+PDdIhw0YN7YkclDKhbKs6iz/4FPLTj9lhZL2oXF5NB5B5zio3xAh2xisaRWOiJXWx7X6PJaBcKD6HgzH+aaQbbDQqhIM27elIPvL4QVnI4SnYpI/jo6VVaFTjqsrcFmOthdmqraRpZDl2tLaWyCTGfWJLAWlCtJWRFrZY6jEmy+JaA9ul0tTuGldo9qW9lfszBpLgLrz130C2m/F5euhrdHH0rV6cZ5d6bLhcwlXPheXr+3fIvFbcGVNq7ZQF/uVu990CbS4cNcmVnB+a0HsFSG9twdlQdiU/b96wLnw4zOe88K3hzSaK+7d/Nl2G2PJmTnB0xvMygvwF4aD6L7HF77KX/p7zV+O+g+xbcHa+cXzYRTDu1p1rfSGdK3Hz6g6a60mA5/Qsc8aVfJnK+v6Bo/3C4wUxoTn2K+nGgc60FqNEaHiy++ielGDnGa57lczlSna2orpQlBVzBpjml9w2yJ779QXG3rYjxC6l0dM8ZxpDQlpuVjvdjdNoGQd1yCiQroasFgGn9J+DTMtYyQEqW7mdbxr4a7AO8xPPyj+fQkC/NvTT784WrfwdrUHQCLl0x76h4Ehw46nsl9eOSqQCAQCAT/hR9o9g/ifHAogAAAAABJRU5ErkJggg==','data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAG4AAABoCAMAAAAn3DXUAAAAP1BMVEUAAAD49vEoHRrz7d24t7fn2bJzcnJgWFb4j4lDOjhfWFZcVlSdmJb/dnbvhH72oZ4AAAAAAAAAAAAAAAAAAACyo8CHAAAAEHRSTlMAC/pXCVMJ2/X0p2FfAvYVIZ1JrwAAAlZJREFUeNrtV93W4yAIZNRo1eTL+7/tovlvTXcx394xNz05RQZwQCVSKBQKhUKhUCgUCoVCoVAoFAqFggiDBfpWwloL6RI8CtbK7C3B9ZNJlz7LjQnJyujQGSiRq5shinegFo2/8+Ef6nKlA2H8u2P/mV1Z2kHnEQKFAkqUxzsfGDP/X81yCvCd2XHg3hyIJrVq7FI8GZmRuul45WgMf4fiiIKJ6S12j3TQgHlzx04eUvEwkUVd4k9ctRTcZVs8uZBGW1LnFQiGS/mADsXF6MksdEShZZ6X7IqtAeFBdryYi7nsIPthITSkmddoauH7G2EBb0fNzmRQvM/OVKvUSYdlNPhCB79J0zTHyHjochkpwiHIdHbZBNaCCXVTFuRWm+PoBF8+CZBnt6klGOxqj2iOle1vFiZNVWD9e5fjSC5uzeWa6W3Zp9p1TnjenelKI3MLV7496uvI9xjDmlwd444dSItpd5eeYnI20xHD1DizUoh1BhSl2KFTKkurE7vy19sFzsXMIcZYGmUJyGHoaITL8eyxHzVz9TZgvpxBxQBrLPJiXu8C1y9cfj+P367sruLzH3Q0XyxOZ71UKpa+3VGmCUyFqaWYjQ6/R/cPtyNZdl9jm7cizrd0EGaHuxsfl/G1446R6URjpQ4huAa44V4/r5+KF7m5aeJIdq2l00x51wnRysfZ3dg4K5vRrHV7j72WdwaDFavLfl3CCRLuG0HY5vs7rQ+DnO5b8eeJMU+/1nfiW/47nZWzYUInSE7X+zRfTyD585q1MnQBTx+/CoVCoVD8D/wB92oO8wNiP0oAAAAASUVORK5CYII='],
+    ['data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAG4AAABoCAMAAAAn3DXUAAAAP1BMVEUAAAD59/Gzs7P07t8nHBrm2rRxcXFcVVP6lpHxq6ZnYF+Yk5H/fHzzpqPs37b7zqMAAAAAAAAAAAAAAAAAAACAUOjxAAAAEHRSTlMADwZX+1AH5vENpl8DVyHz1LYMnAAAAiNJREFUeNrtl8FywyAMRLXYgAHj/P/fVhiTpg2kA6SdHvRyiDOAlhUgEyJBEARBEARBEARBEARBEARBIDqWBWMjASw4OoeMipXJHn3didy4mqI+e3Pe0lS7AmjM6aFvvOZ8/CFf5GBMfijfT17uDeZuatDdPVIeXxFEyR+1enS6U4HIWqKgKuFM7uBzB0wmU5Gn9ZNaKsl+tlsfjJmQ82eQ/EXETwGP4QyMtVebz718fz6LnOLPajlDKWTysfjKIc2NNjm1K48wM2u3riGFSSarybzmYlNbWCnQTDINZ6jklAVhnrcKrnXzbH8dUUtyOM7SAD5Kq8e1XTyqwXJj4HyG8kroleMRZUyw9spmbV0UlM1TsVZdexXdcnjIJ6cQwfuARrEAnxbO4r2mgDB+zB8c/RTFFMPLhBy7o3PR0Cj5vH/MY8VUHGB87Z7Zf7oL6P61G3+h9ZZO/bI2OOjb7abh2peHN7rjLN8S7WwPyDU3355kWC253H9dLts73IFXNzH9nrsKyMWyS/b0/BZ3R/sExC1yFtOjo22r3/AU+twRGvYcy21s0e37fj5WV08p3VVWFu59QFVwij3lFlaL/PsJbuUIfdnUjYOMHdu2UXSRZWPjZs8l0/XlkuvQ0oKFTmhp0/uGbY5I79wYKb4qY/13fn6ZL6PoyX803yefNuZ7Q87NZ2AE7001AHjzUvdWmfmHBwzI8VkY48A/WldBEARBKHwA48gOChplXogAAAAASUVORK5CYII=','data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAG4AAABoCAMAAAAn3DXUAAAAP1BMVEUAAAD69/L07t4nHBrn2bG4uLdwcHBcVVP4j4lnYF+Yk5H2pqHt3bb/dXXvhH77zqMAAAAAAAAAAAAAAAAAAAB2fJv2AAAAEHRSTlMAC1f7UwgH5vWmXxIgAvbzlHaIngAAAg9JREFUeNrtl91yhCAMhXOQHwHtvv/bNojabSvuBLa9yrcX6wyQwwkQkUhRFEVRFEVRFEVRFEVRFEVRiBZj0DcSgMEiHNIrdkx2kXUnyv1qjmT2xryVqYoCWIzpQTbecj7+kW9y8L4+HP+/vJwN/jTV6e6MVMdfCOLIH7V6CN25RBQCUXIX4XztEGsHDCbTUaTpi6tUUvhqDzF5PyAXtyD1j4ifEp7DefgQ9rZYe0V5Pg85x78pcIZKyOLDxItDWhtDcRomHuFH1m6aUglTTF4mc59LKG1pokQjyfScoSOnLAj/e6tgX7fI9qcetSKHZSsN4KM0RezbJeIyWG1MnM90vBKkcjziGJNC2LN5tS4OLtSphOD2vQqxHJ7yySlEijGhUSzAp4WzeNYUEPqP+ZOjV1H8YdgMyLE72hYNjZLP+8c/V0zHAaTJNDdvkfXF5cHYga0ifqE5yN211TLs4/GwyM25yJN544zwKLQn1OXuRo5Y7eby5N7pjtYVS16wNncMy/3nXUXq7vaWmPN5vWuvnaysoGUPlOeTlqJzVlRWDPde4C7gAzd/zB8bM7l81cXxVGVVbLGtg8zbY9eb56XRh0tmluUSxpoWZy5NG+nuuh/BBnlO65uOeUlnqbSdWLnc3U7OK5PXt5078S3/p5yRq2FFJySXMwOfeBB+m29nh/eK7QKjH7+KoiiK8hd8AuFGDXrIiP3IAAAAAElFTkSuQmCC'],
+    ['data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAG4AAABoCAMAAAAn3DXUAAAAP1BMVEUAAAAmGxj49fDz7d2qqKjm2rX8uLdrampZUlBhWliemZj6lpFwamn/fHyUj430pqMAAAAAAAAAAAAAAAAAAACL3/xcAAAAEHRSTlMA/Q9YCEcHBuuoX/JnA5pXeJzlTgAAAnhJREFUeNrtWNGyqyAMjCsVUNT//9uTYLW2FTtE78x9yD6coQNkk00gcogMBoPBYDAYDAaDwWAwGAwGg8HwHwLUtgCUm9u2pbq9WqrN26r1LcjpCeFYnCq6NzFc/utLi/1u0boDbZ2W2ClzCv/hVUZXqeabuTbFEGLCUYCe3eHZkPqT+H/n+uVyG6nJYHP+m82HZbaJ7bGFisjgqV/NMY7YXrOhzxuuwIPZwmIsNfShJwjPOWpYAnLXyCbOS9NMYjKwOqlJ73Qce1aZ56IMI2HS5w9BbBCySSmKED+1nNY5rhT2rI8B2orhbWLMxadJFnb6tJWji6MnF2J2K11InFhjd1fB+mY6jG4RmigIm/Y28pKPyDzxWXeJCnScs5QdanhDVBanY4GyivFV6wW65VjmhcHpcge5ySZ2eMnPgvRl682VHCJvQ1utqDQFcTgA20En93kQdnMQMXOBQdG/kG1nurTdG19WsCkdhTpsyuiqJUky8JQsuO8FLmyeMN2k6j/7g9VzpQF9Sv2+xNcOxSRO5iAC9v1WZQ9F7lDsbeP3zY/XLy6Vh7IHeaGAd/69++z6L0/wtPzcbmjNUS8fnw7i/ANd+chqozs+kT/qT0FXDHrcaDqM99Dh14XDHz84u/9uio555rVKRhnfFF3B95HmYWYVZdjRMBwH6dyj8rO2UMsd0w0cYjeOYx4eZs91lXTIz4TuCBwT8oDZ5qMFjj/aqx8JhQcQRgzDQHM3My3Lqqi00qupBCbKoPKK6oZXfMOIzvNM81lPU7zXcBbgOR6gOwEpzHtNXrwNVJ9GTgFw8dY/7668zgEFHfdkHS7+I8FgMBgMhn+DP4EzEQQpdWuoAAAAAElFTkSuQmCC','data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAG4AAABoCAMAAAAn3DXUAAAAP1BMVEUAAAD59vImGxjz7d3o2bFraWn9uLepp6dZUlD4j4lhWliemZhwammUj43/dnbw4rUAAAAAAAAAAAAAAAAAAAAjWcF0AAAAEHRSTlMADP1ZTAYHEOv1qF9nmgIcT1fF4QAAAm9JREFUeNrtl9uyqzAIhsGYgzHq+7/tgqipVdNOsHtmX/BddNYaEn4g5CCAoiiKoiiKoiiKoiiKoiiK8h+CizGIKJxsjFma5i5SqRJt03iD4OWC6ME06Rk4ivn8a2uD7WHQPgOb5I7r9iVLe4oq48AIK0PuTIohxIR3CVoKh6whjR/y/5rdIWQTocuQO3tVs2G1dtHce2jIDC2MuzviTu1lDWOe8ASLpBZWZ6mDUz0RcLNBRyUA/0xsonXpuoldBqpO6tK7HOWeq0y2yH9GwEm+fhjYB2B2yU0R4rmW026jTqHIxhhQ2jE0jZ35uLmkwk5nXzm7OFvwIeaw0oOFY28U7l6wsZtus1sLDRBYTXoaWV6PSDpx67sEFTlas5QD6mhCFDanpwLlKsZXr1fk1m2ZBwYvWzukW4H6rNvWZyVdfL2FklOkaWiaK8qXAgccEMtGB3/eCAcbcjFzg7Fk+z5g31kulXPj4gVLpSNLh7KHZN2SeDFwK1nw1wE+lEhIbhLdP8eNNVKnIY4pjccW328oEvFsQy7gOJYu69tfHNfHSlm4+Xry4/7DnWJ6QavwZMsSaL19v30OoZCBzPxvOaE99oIjs2Zy2VuPrvoWaC/m90DqAYmy+5q3qx9I/Y+0cqPMuLgF50PHPJN7SHt2H/JzDr4V0/eNz9ratYXghkJN0btGOeR2XtwV2nADDOuoAdwdnh7tbc/ahY+U+/xmlsl6w1D7csFF8tVUo9SyOmJpvvA+f8NwgljfCO3bfMFPCX6m/+WpQv04E27+2b6TflS8vmMEB/GMQqBdzjz4PEfJTqBe6UUI3n2KoiiK8u/5A1ZLEDqKdRUhAAAAAElFTkSuQmCC'],
+  ],
+  girl: [
+    ['data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAG4AAACNCAMAAABhVb/lAAAAP1BMVEUAAAAlGhj7+fWnp6bw7Nz07+NhWldtbGxDOjfr37NkXluno6GWkY9oY2Hn1rT7rKsAAAAAAAAAAAAAAAAAAADp+51gAAAAEHRSTlMA/AwJToXrBfIXp2eeXEwMuWlfCgAAAo5JREFUeNrtmNu2qyAMRTGkIIL2///2JPFSR7W1omM/nLHmw+4FmpWEBGE7BwAAAAAAAAAAAAAAAAAAAMC9kKPHg1y6aCY5Zv7FCIvYTZ4z0Q9zHN0hSJqnQ0My43lTdEl8P8yloxvr4PG3ZcfHU8D/tNFEH+UlRvo4wdl4vKe+Fvbt+aMJZxBjlEvXdcXTrjn5ztt4f0toVEIzEngdyeLO0E3j7c7w2edDbtVQCKoZ8l74NhKCzeuv5ZOK2OgKEZfi1P/tDFFzxfVMWaO8IhZdLxISUhyTGfpN9UXqp8ACOc1EfXxS+uK6rIe3lSmdWNxpBlu6roTOQg0X6lMsZWei+kY+7yTAfBGRHMSxbG8rW0CdlR7OY1mK09vw4hicZjVMDlLtPt+PwRXLpUYnf/x76VroEja3oud7k67OpbX2WChamu+FMMvp2slkS0h9aUrli8G2Wdg2pg/LYMuSCtd01dm0RuPwWW7ukWbKt6Yi1MglkrOUJvNAzr0GbaElr1xxStUDoJZKnPpglntfO9+uk6kfHaWq7XLq2lUAbd7OWjlDVl2++sCjbU6UX3LbZaFuGQ1OpwbyXLllpmALv1ic+4CWg7a3jXL0xXtNB3s/VG6asnqtPl/7Tp4wwWQmnfmonbw8D4Nt0VqXTVNkwlD9SMg8KryELLrncrbXBzB5gbTpsn2zyD1/KJG3k8H6hcbx4asxOhHd+x3Bx/lCs7kX0eqys3z0K7lEh3eEwxsQpbGthmTQ5+jkinAop/c73VC+ozpfGHSKF7+P+131rp6nhukefKyWXOLhcQfMZ7Zquhzdn90iK+So+h8CVb+kabM4j3MVWzRzfTYropPG4joS7vcAAAAAAAAAAAAw/gEQ0hBKIoXLswAAAABJRU5ErkJggg==','data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAG4AAACNCAMAAABhVb/lAAAAP1BMVEUAAAAlGhj7+fSnp6bw7Nz07+NhWldtbGzr3rBDOjdkXluno6GWkY9oY2Hn1rQpIiAAAAAAAAAAAAAAAAAAAAAb5ttuAAAAEHRSTlMA/AwJToXrBRbyp2eeXExR+rHQaAAAAoZJREFUeNrtmNF2gyAMhmNIAQHt+7/tkmCdU1snenaxk+9irYPlT0KCMADDMAzDMAzDMAzDMAzDMAzDMAzDuBcEfDwQ4kUzEYjoN0aIxW7ynBB/MQfwDkGUPB0aui02SSjSYS4Bb6yDx9+WHR1PMf7TRhNc4I8Q8O0E0PFwT33N7NtzRxPOwMYwl5RScbhrjn/ndHy4JTQsvqt4WkYyuzOmabzfGT77fsi9GPJeNH3eC19HvNd5w7V8YmEbqSBSKSD+b2ewGhQYCLNEeUUswMASHFKoyfTDpvoCDlNgHkEy0R4flz67zuvhdGVKYos7zaBLl4pPGqq/UJ9sKYOKyhd+3kmA+sIi2bNjWb82toA4yz2ca1kGeG7DCzU4yap/VgexdZ8fanBFcynR8Q+3Ll0NncOmnuNyg0o351JbuxaKlOa6EF5ysnY8WRPybC5Nrnw22Hczz01jOj8P9sSpgC41Z1Mbjfx7uVePdFO+JRW+RS4in6UkmQdy8D2oC815pYZTqhwApVTC1AcvufXauX6ZTHkEjE3b5dS1iwD6vJ21cAa1ulzzgUfaHDF/y22XBdM86kGmenTUuGVGrws/W3z1Ac4HbacbZfXFOUkHOTc2bpq8er28X4fEbxivMrheO34fet2ipS67rvCEsfmVkKkq/BSaH6K+gNExKE2X1YXxTImsTgbLD6zj4yQFuxezM3LrO4ILczy441icLjuzn24hF/HwjnB4A8JY22qMAn6Ijq8Ih3Jyv5MN5TMi9IFRprg3ud7qXT1PjdM9+FgtQqTxcQdEZ7ZqvBzdn90iG+Sw+R8CTX+J02ZxHoCGLZqoPZsN0XFjURvR7veGYRiGYRiGYRiGYShfysoQT459JPIAAAAASUVORK5CYII='],
+    ['data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAG4AAACNCAMAAABhVb/lAAAAP1BMVEUAAAD6+fUlGhfy7d307+KqqqpzcnJcVVPx5bfp2LREOjiuqqhnYWBmYF37y6KemZcAAAAAAAAAAAAAAAAAAADEhdq+AAAAEHRSTlMAC/xMiAQF6BJP+F1kmPWanhy7ogAAAddJREFUeNrtmOduwzAMhHmWNbzf/21L2amTxiOKrBZFcN+PIOPAEylaIyKEEEIIIYQQQgghhBBCCCHk4wFCbVAgTl0bSYiDEmYaRoIxKW4itkidnJj6pahGCIWmJeC1nZHwp63yb4MRQj4GF1/syQphF8UvuJ4uV66ITyfDIB0Ohq9G6EX63hTx66SKtN7s+kEw+VnhB1wtqMPUVjd8tzN6OEi1KnA1Pze7eb9Ec3Y7of3idPOz7kpzQMP4CYCZNNqwGbwVtDFvVXTRsb9WSi1UezvgqF+7KZbDMNdwmcVZcWVL9TGlGMHOifab9O7fHimSsWK0UrEZvifJPw3eiZ0nDGumQ65ZiPPRVn71jh+e7LRzqlXhlg8OWSdVo4M2vtJj9e10DfGbQlnoAnBPta2WJzHDLiaCbnrIZz/K45dR7gqdwHCwSLnnd4DJ7ZaDjQD3TPFDvuTW/NpRNewpCtqtE3vyY5M7+H1BM8qYYJfQMUl3wHEcT6K9k139yk3vUSH6NWEGx3YpHRp0SQhxRTklnEuaKNGhp1xfa3O5j5rlHpxUU5XVRXhrM8LV7P7uApxhB+Tmh8wdATaL+PC+v9/lN2hOdvpgmTwC/3AghBBCCCGEEELIzBdH5AqjW6zwUwAAAABJRU5ErkJggg==','data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAG4AAACNCAMAAABhVb/lAAAAP1BMVEUAAAD6+PQlGhfy7d307+KqqqpzcnJcVVPw47Pp2LNEOjiuqqhnYWBmYF2emZf7zqQAAAAAAAAAAAAAAAAAAADoWbD1AAAAEHRSTlMAC/xMiAQF6BJP+F1kmJrtshgoVQAAAdVJREFUeNrtmNmuwjAMRD1Ns3Tl///2Oi2UpaWEJqArNOcBARo8seNmQYQQQgghhBBCCCGEEEIIIYT8PECoDQrEqWsjCXFQwkzDSDAmxU3EFqmTE1O/FNUIodC0BLy2MxK+2ir/Nhgh5Gdw8cXurBB2VnzAdXe5ckV8OhkG6fBk+GqEXqTvTRG/TqpI682mHwSjnxR+QG5BHca2OuO7jdHDQapFgdz83OTm/RzN2fWE9rPT2c+6nOaAhvEjADNqtGE1eCtoY96q6KJjn1dKLVR7PuCoX7sqlsMw1XCexUmRs6X6mFKMYKdE+1V612+fKZKxYrRSsRkuk+QfBu/EThOGJdPhqFmI89FWfvGOHx7stHOqReHmDw6HTqpGB218pcfq8+ka4leFstAF4JpqW81P4gG7mAi68Saf7Si3X0a5K3QCw5NFyj2+A8zRbnmyEeCaKe7kc27Np46q2FQUtLvPLmTaIUXQnC5Wu3YJHZN0Bzyp3WkS5mZXv3LTe1RQv1MTIntzl9KhQZeEEFeUXcK+pIkSHXrK9bU22b3bzPfgpJqqrC7CW5sRcrP73gW4yXiSv/PLuI/YQ8SH9/39zmQscYd2c3OMwD8cCCGEEEIIIYQQMvEHetMKp4ycfk0AAAAASUVORK5CYII='],
+    ['data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAG4AAACNCAMAAABhVb/lAAAAP1BMVEUAAAD6+PMkGRf079/07+Krq6t0dHRZUlD+u7vw47nn2LLp2bainpxfWFb7y6JCODYAAAAAAAAAAAAAAAAAAABV+kxlAAAAEHRSTlMADP1KhAUE5gYVh1BglPX6bQlVGAAAAetJREFUeNrtmN1yhCAMRhMRIqur7/+2Df6sdoqiwPSi/c7VzqAcEiDIEgEAAAAAAAAAAAAAAAAAAABQF2bqTcvExR31rSebesqRMXXGTUZ9SdRmfQ2fdpL2sSnP4yG+ZHDMrto6oLSOuorLLpmoV0XdDerq/nZ00P073VJpXKq6V9LxcjJddZhofqLT02+QSeTiNWnkzRm+iI4t09QoMkTLhON3Mzfb576IzvEQbBqcxAJwNNuEGmFXZe4k9DfQMEXmRzMdmnUkoblcZ7XHoLNkQ6eRdE6rrnlX0RlZsiUnunnmVFVV1ywx8I+pc1trFR0tk7P09zM2e2im9Jfemc7zdva7NV3zcomsvY9uXrj6luHnOrPnzZFsyXKx2mVlG4xdlmqG7jBLrBtZwlrRH5FX7OKTPXQurpmGBnNRm3VTfkqAZrP0RFjLy8knnft2Iugt44Eu/qFtN9nq6fZP83U77GPZdcmstnTngsAdnx/DT6LjOw/0I42HCM90N65thl26rI/jeDGyj85Tcs0kb0Ds2b/U1/sZPtfZOxuw12e7uaRcEDwX9OERplt34N4UXvC26G7dXkPVa2vAxj8aY2l0v/XnRY6OOTe+rDfDOWKzIMr4q6Tg75Wc6HRjmTw8EwAAAAAAAAAAAIDyBUPeDFr5aG5DAAAAAElFTkSuQmCC','data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAG4AAACNCAMAAABhVb/lAAAAP1BMVEUAAAD6+PMkGRf079/07+Krq6t0dHRZUlDv4bX/vr7n2LLp2bainpxfWFb7zqRCODYAAAAAAAAAAAAAAAAAAAB6oEDtAAAAEHRSTlMADP1KhAUE5hQDh1FglO366OJ7UwAAAedJREFUeNrtmNGSgyAMRRMRQqvV///bDVJbd5YKArMPu/c8OYNySMAgEgEAAAAAAAAAAAAAAAAAAADQF2aazMjEzR1Noyebu8uRMX3GTUZ9WdRmfQ+fdpL3sWnP4yG+bHDMrts6oLyObh2XXTZR9466Avrq/nZ00P07Xaw0LlfdO+k47kxnHWaar+h095tlFTl5TAZ5cIUvoWPLtA6KzMky4fgxbM32ui+hczwHmwYnqQAcbTahQdh1mTsJ/c00r4n50UyHZh1JaG7XWe0x6CzZ0GkinetTNzy66IzEbMkH3TZzquqqG2IM/GPq3N7aRUdxcmJ/P2Ozh2bKf+l90nne9373TNe2XBJr76XbFq4+Zfi6zrzz5kj2ZLlU7bKyD8bGpVqhO8wS64ssYa3oReIRG33yDp2ba6ah2ZzUZn0pXyVAs9m6IzzLy4dPOvdtR9BTxgVd+kPb7jJOfmq541jeumxWRyo5ILyi88lUlEfHJTdMy6461RUc2wy7fFlfVLdsfZ3qPGXXTPYExJ79fVmWyQf4RGdLXsBJ771tJeWEIDphCrcwFZ2BJ9N4wNujKzq9hqo39oCNvzTG1uh+6+dFjY65Nr6qJ8M+YqsgqvhV0vB7pSY6fbFMHZ4JAAAAAAAAAAAAQPkCL/QMPEABlOoAAAAASUVORK5CYII='],
+    ['data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAG4AAACNCAMAAABhVb/lAAAAP1BMVEUAAAD7+vQjGBby7d6qqan18OVvb29eVlTt37ZEOzno2LRoYV+WkI+ioJ37y6KOiYcAAAAAAAAAAAAAAAAAAABJ0PJ0AAAAEHRSTlMADPtMBoUD7RPtTa2aXvXSjfEvVwAAAelJREFUeNrtmN1ypCAQhfsIARTR93/bNOrM7o46EiSp1Nb5vNCLrj79g9AqQgghhBBCCCGEEEIIIYQQQkhrjAHue8FyXZsZiGsRNRZXl1ZFQZVgSxyZVmoiocAVXDO5doH/xxER8nuw9tLEoc1e+/Ry7s65p+btnXbbuc+dYTPBH/tanDobo3gvcbTHm45mhiRq0ktMt/SQj4i+2+jH49MJo3+YdNHcOy4fnmJ+8LDY5WafYl4j8wm2dpFgzkLzIoRRb7v1Akk+551LMIrx2bK6b6KekmQ5Feo0U78bLZwK6Zyw5J7Ez1nV1TUOqqb3ee2c9qXfy8UciZh+NelM1A7Xdi96s+bYrQnuZjRtkx/zw6N9t4cdK3Zdm2LOo8a2XGZIXSkD8MgFcQv89LB3kpaQtBhiSwa+/Uj2LMq21P27KrklJMltg9SMxX8518c0JlzvdrbNwIOLHfp1Mja3TwX3z/aMg3qpiduCG75tMgxHFg3lXhv7zXJZZ5hkKpArWKHmqDyvTNP0Zv19Jbvh6rsFASHrDWEBp3IoWaHBhGx4QdZ5w5AtRD4KXoiqLegwO1NQU6f5mY8WDF86GnA3u5/7RKyQQ/XvDlSeCLBV5Je34m9OfTUrstMXy9QR+H1PCCGEEEIIIYSQhU/lSgsKF5wpqAAAAABJRU5ErkJggg==','data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAG4AAACNCAMAAABhVb/lAAAAP1BMVEUAAAD7+fQjGBby7d6qqan18OVvb29eVlTs3rJEOzno2LRoYV+WkI+ioJ37zqSOiYcAAAAAAAAAAAAAAAAAAADpAIefAAAAEHRSTlMADPtMBoUD7RLtTa2aXu3Sw0C3kAAAAehJREFUeNrtmN2SgyAMhROhgCL1/d92E3+622orC7Szs3O+XuhFmpMQDFEiAAAAAAAAAAAAAAAAAAAAAFpjDHO9F55/52aGybWImmdXp1ZZQeVgcxyZVmpEIcMVu2Zy7QL/xxEB8Hew9tTEcZtee/Py3J1zN83qTrt27ufOeDXhb/tSnDgbI3lPcbTHTUcy40Ri0lNMVXqsR0TfrfTj8enEo99MumjqjsvNU9Qbz5Z3udmbmJfIfGJbukl4UqFpFuJRLrv9wpS85q1LMJLxallcNxJPiVROhDrJ1O9GCydCMifMuSfyk6q6ssKxqMl1Wionden3clEjIdMvJp2JUuHS6kVvlhy7JcHdjCZl8qPebOWrHnYs2WVvknkeNa/bZWIqW8rAvOXCcQ386WHvKM0hyWKQzRn49iPZbVHWre5frZKbQyItG1PJWPzDudymMfF5t7NtBh4+6dCPk7GpPhXcXXvmg/USE7cGN7xrMjxsoS3l7rML75ZTneG6Sb2Uy9ih5tDDA1eRu87CtdkNZ+8tHDiI3nUIyovacc4ODSao4Qkq9IJBLYguGQ9EUQs6zM5krKmT/MylBcOvjgauze5zr4hDxZP8mX/qOWKL0Ie34GtORYsrOs1NGQHv9wAAAAAAAAAAAJj5AjpVCw4OVn+zAAAAAElFTkSuQmCC'],
+    ['data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAG4AAACNCAMAAABhVb/lAAAAP1BMVEUAAAAmGxj59/Hy7d2pqan28OJfV1Vvbm1gWVZCODbu47aclpXl1rWinZtjXFvzsKoAAAAAAAAAAAAAAAAAAADHP/xTAAAAEHRSTlMA+w5NB4ToBp70E5ZOWmwU5f7iyAAAAjpJREFUeNrtl9muozAQRNtlMF4g/P/f3m6zTK5CAgE0o5HqPESKUunVbtsihBBCCCGEEEIIIYQQQgghhBBC/ncAtC0kXzQzivce0uwKvTq7hyOWoDHhDofQzNrdIrUZt/VFC7pbgc22YTfhLUUWfy5M41Pbp9+6r4MUHI79a9PH6AQxhBCHDwpfFc1LtKdCSM5IEe/q+ZCqcPGG3B7OhVCtBbxXTCHFaxXtOumDG6q3tB19h8G5Ic2K8rpgviM4GcyWDNG5ZlvxeCyKgEuFlJISrDP6iWDBv2wB74IPU6mRVHGhoGZGqjup7sKGu6JrKEzrBOFthw9lN+iqVDNz7Op0QyOzOw3Iqh66C91DSSLTMrdU4xt3daUEU8jJ3LLOCVhnEopb2Opd0ZzjHwU6O1S+P61QA9U69eNq7PFSqM5qrGHNgmQBnJlnkzetphZp2njWwC1LUXd3SYvC/oYLAzOoNcQ6WYaNVTArmknR2Hf4C3uvs3FZdBmksub2nCVsqIZYonqrqxLSn9/rjTShDqgwyFOhxvUIVQ+qSKZoavaX3Fl1fHn8bghGrA4XRVkW5DV3z1tsPsL63xm+KC66a7RKzceDXxXr7eKm7GZjGfXy1OcKtrbQje7qjszjh/vhze72w+nvNni7O/yV7PCPinn+nrr+M6PdfyOss0GPu1PI8jQ4kGa7TCd/fqzP2Y0HbGSbfLCj3MOfxO4ByFmw/74T9Hc9LvyhJzd8ewveZ4EQQgghhBBCCCHkIz/lSg2tVASMLwAAAABJRU5ErkJggg==','data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAG4AAACNCAMAAABhVb/lAAAAP1BMVEUAAAAmGxj59vHy7d2pqan28OJfV1Vvbm1gWVbu4bJCODaclpXl1rWinZv/AABjXFsAAAAAAAAAAAAAAAAAAABoHNpYAAAAEHRSTlMA+w5NB4ToBp4S9JZOWgFsAEK2OwAAAj9JREFUeNrtl+uuozAMhJ0JhFygvP/brh0oPatmCwW0q5Xm+3HU6kw9tpMYIkIIIYQQQgghhBBCCCGEEEIIIeR/B0DfQ9LlQN57SLcvU7N7OBIJmhPuMIRW1u82qU+4bV20obsdaC4bdgtuKZLs2smjlabxadmX/w1fJyk4nPvXoY8xCGIIIU4fFL4qurdsT6WQnZEj/tTPWarCxRtqm50LoUYLaK3solhSitc6OgwyBjdVt9zOfsDk3JRXRXnfMN8RnEwWS6boXNcqL7h5fioCLjVSSs6wldG/CJb82xHwLviwtBpZFRcaamGk2km1Cw27onsoLPsEq+3Z6ibdlRpmzV1NGxpZ7TQh63oYTq/eQ1CyyLLNrdT4B7u6U4Ip5GRtSecEbGUyinvSWruiNceXAoM9VL5/WqEmqn0aZQs2vzVqsB5rWqsgWwJn5tnipt3UJi0HzxawFSnq6S75qbCf4cLADBoNsU6WqbELVkW3KDr7Dn/h7A02Lotug1y22n5WCRuqIZaobnVXQsbzZ72TLtQBFSZ5bxRqRqrIpuhq9ZfsrDu+zL/7bNWll6I8N+Q1u59HzII95FHDPZJ+Si3FVbtOu9Q1H/zppdjeLm6qbg2WUD3GZKB5hG60qycyyYf3w5vt9tMZ7w7YfEG8Yoe/Uh3+UTPPv6e+ZgD6/TvCNhv0cXcKeV4NDpS53cn8+bGO4zGSTT7Yo9zDn8TeA5CSYP9+Jxjvulz4Q1du+P4WvE8CIYQQQgghhBBCyEd+AT9UDdEYvxeBAAAAAElFTkSuQmCC'],
+    ['data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAG4AAACNCAMAAABhVb/lAAAAP1BMVEUAAAAmGxj59/Hv6tyrq6v28OJoaGhdVVP6u7lDOTfx57jm2bRoYV/o2LWinZtsZmUAAAAAAAAAAAAAAAAAAAAer5hWAAAAEHRSTlMA+g5OBoMF5wjwEoejUGBo6/iFsQAAAn1JREFUeNrtl9lygzAMReVrY2OX5f//thJ7QgjG8NKOznTazFTR1eaNSFEURVEURVEURVEURVEURVEURVEURfnrANRaS+6mG0eoqpTjhsUeitwiSy3hmTKlNp1ZpUTpoew8x36aHOAfmwOqzkxaqp8bOzrtys9WzsMl551zeRkDbOodXH6BNnI1dtP9rU9viW3/ZMg5sqEDz2nHw3oy0n6efGu7jo1B4XJ27CMawz8mxsC/Qt99+2IYDPkrYhx68hfl4LFoTdCRYFwsqJHPTcaU7EeF3ZDtLImjpm/IxGY/Bd41YxFETOAPrmBUuB7BhKlOpuF8OxPwXiVPLnCTm9HGE6SW5AvkuCDs3zszyX2cwU3rjOQucj2VZCeFCWN1uFDwnG3zWW5ss+RONs5FLZLDIseujuTmYSE4SdNfL2bizRP9EOk4dLHvgjlc69P4Dqpkr2dnZZZtMHN2I91h3BujYK9nBzmxYOIa+VhRHGwrG7kGZb3z1PCUSUlPHHmpwxqU9WVycDIrbnYV66lKAN711pgC2jK5IT3OaHIVN0fYbJWWHS+sG1lbuBDYe5SG9eIrrDsm+HCqd0cp70FhKHipnBxEgXdKOYA8liOsfc1wuXhwPKx2R85L1DHIan+fbrxWPUY5gDpu9Z3shsaQw+weCelHMkwDeNHG+OuOHPYXA6Q6HS6Jm3KD4Plks818h7gp9+FG9/2/+XLVspJuXC/bvLi2cvSEXH6ddvvUhccI1mfJ6Rth6jjGS3EBy0sknacJOyV445k3JVXn+GjZhFcV+DFoC4HALzeqMkK29onXpDiqMqaON0l+Vj9Aa0EPBa4oiqIoiqIoiqIo/5dfyWIQHh/RSioAAAAASUVORK5CYII=','data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAG4AAACNCAMAAABhVb/lAAAAP1BMVEUAAAAmGxj49/Dv6tyrq6v28OJoaGhdVVNDOTf6vbzw5bTm2bRoYV/o2bWinZtsZmUAAAAAAAAAAAAAAAAAAACeOfX6AAAAEHRSTlMA+g9OBoMF5/AGEYejUGBo20MWdQAAAn1JREFUeNrtl+mOqzAMhZ2TkKSZAO//tmOzTyklBP7cK3+q2kp1fbyRhUhRFEVRFEVRFEVRFEVRFEVRFEVRFEX51wGotZbcTTeO0DSpxA2LPRS5RZFawjNlSm06s0qJ0kPZeY79NDnAPzYH1JyZtPR6buzotCs/WzkPl5x3zpVlDLCpd3DlBdrIvbCb7m99ekts+1Eg58iGDjynHQ/ryUj7efKt7To2BoXL2bGPaAy/TIyB30LffftjGAz5L2IcevIX5eCxaE3QkWBcLCjL91wwJftRYTdkO0viKPeZTMz7KfAuj0UQMYG/uIpR4XoEE6Y6mcz5dibgvUqeXOAm59HGE6SW5CvkuCDs3zszyX2cwU3rjOQucj3VZCeFCWN1uFDwnG3+LDe2WXInG+eiVslhkWNXR3LzsBCcpOmvFzPx4ol+iHQcuth3wRw+69P4Dqpkr2dnZZZtMHN2I91h3BujYK9nB9mxYOIa+VhRHCwrG7mMut55yjxlUtITR17qsAZlfZ0cnMyKm13F11QlAO96a0wBbZ3ckB5nNLmK+y0M64oX1oWsrXwQ2HuUhvXiK3SbnW3SSdutlNegMBS8Vk42osArpWxAHks+7SL151xjOR5WuyPnJeoY5Gl/n25s5LjqMcoG1HGr72Q3NIYc5j4hIf1IhknA3yZifLsjh/3BAOmVDh+Jm3KD4Plks818hrgp9+FE9/3Xcrlm7n79wX0jh2I5ekKuvE67derCZQTrteT0jjB1HOOhuILlJpLO04SdErxxzZuSepX4aNmEnyrwZdBWAoFvbtQUhGztE7dJcdQUTB0vknytfoDWgh4KXFEURVEURVEURVH+X34BpUYQE7GXdckAAAAASUVORK5CYII='],
+    ['data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAG4AAACNCAMAAABhVb/lAAAAP1BMVEUAAAAmGxj49e/z7d2qqqr28ONwcHBdVVT9u7nn2LLu4bfp2LVlXlyinZtpZGKZlJIAAAAAAAAAAAAAAAAAAACGX6nPAAAAEHRSTlMA+hFOB4ME6weGFE6iX1aUo75IfgAAAhRJREFUeNrtl4tu6yAQRJdZDAnB9v//bRc/0vTWrrFDK11pjqrUUsgO+8SIEEIIIYQQQgghhBBCCCGEEEII+d8BRLsOgrctqSYJNcvQaOc1hlRFUgu1m+kdGkoQ3yovFftWILSqgyR6tORhQWhWdscFd28oV8GmnPc1+cT3ZWe986+J3E9qeP3K45p3YRWA6k+CixieHRsCrgUTQ47OSbSPOPhtwVCWSZxXieT+mnfwQ3ZfyP12/ZUtfSIx97UBfcqZldlIXEQlu+gy/vUvYIjzQhlc7GV6ll7C6WD2UoJjTKr2fxzj+N1OdDpr2JPFG7a7iPNyofwwFz9X77YrOyxxiKNzJY+xOOkvlYqbRsOalWGv4565syI10RH+bKkkWNuanbwEs7C36eeGLIhqYcf5ytRp4pmhDL+W3O4QHFY56e0P6bzcZNpSMcaIcS6FYS//QZYi9mW1XPHutYXR5xhH/8MMg3WAjJDBejxAr4/osPUIYMfNKS6PN06E4mD4VMP6arAeoS9jM0zT8j25zVK8YX9dUzlMR/4XD39T7vjsbOtdQroXD9MEft07K4Z0S5A/yV1NkBvLoaFcqnyJqpFDtdzfBDMdzamaOxuqvVOsr3FSDrwryHo1wPEdQbtlS6rXozlb8FIRoIcF3roKdhnUi9iPUfoS3aFckEej26udeqmmrlTvXQtUCCGEEEIIIYQQcsQHo0INwzD0pE0AAAAASUVORK5CYII=','data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAG4AAACNCAMAAABhVb/lAAAAP1BMVEUAAAAmGxj49O7z7d2qqqr28ONwcHBdVVT+vrzu4LPn2LLp2bVlXlyinZtpZGKZlJIAAAAAAAAAAAAAAAAAAACwnQzxAAAAEHRSTlMA+hFOB4ME6wUThk6iX1aUDMWh0AAAAhFJREFUeNrtl4lugzAQRNezjl0nBv7/b7vmSNMWgiFOpUrzFCVIMTve0yBCCCGEEEIIIYQQQgghhBBCCCHkvwOIXi4QvGxJNUmoWYZGO68xpCqSWqh9mN6uoQTxrfJSsW8FQqs6SKJ7S24WhGZlt19w14ZyFazKeV+TT/xedtQ7/5jI7aSGx788znkXFgGoPhOcxXDv2BBwLpjoc3ROon3F3q8LhrJM4rRKJHfnvIPvs/tG7tbrr2zpC4m5qw3oXc6sTEbiLCrZRZfx07+APk4LpXexk/FaOgmHg9lJCY4xqtrvMMTht53odNKwK4s3bHcRx+VCuTEXPxfv1is7zHGIg3Mlj7E46U+VihtHw5KVfqvj7rmzIjXRAf5oqSRY25qdPAezsLXp+4YsiGphx/HK1HHimaEMv5Tc5hDsFznp7IN0XG40bakYYsQwlUK/lf8gcxH7slrOePfYwuhyjIN/MsNgHSADpLceD9DzIzqsXQLYcHOMy+2FE6E4GL7UsDryw7yiTMvX5Naf17Ac2Gt12lAO45G/SL1d7rvw+71LSNfiYSrg/d5ZMaSPhCf/vyWYfyaHhnKp8iGqRg7Vcn8TzLQ3pw7MgArvFMtjnJQD7wyyvBpg/x1BL/OWVM9Hc7LgpSJANwu8dRXsZVBPYjej9CUuu3JBbo3eXu3USzV1pXq9tECFEEIIIYQQQgghe3wCCIQNu6oMxgEAAAAASUVORK5CYII='],
+    ['data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAG4AAACNCAMAAABhVb/lAAAAP1BMVEUAAAAlGhj5+PTz7t6pqan17uFeVlRzc3Ls4LVDOjiinpyXkpHn17VhW1jrrKVuaWcAAAAAAAAAAAAAAAAAAADc73CDAAAAEHRSTlMA+w9MCITsBxXuZIxRpBBmskom3AAAAnpJREFUeNrtl+1ytCAMhcMBAfHr/u+2Cauurq5U6vvjnckz02ntJjnkA1yIFEVRFEVRFEVRFEVRFEVRFEVRFEVRlP+diNjYB8KQtTbyrxKjxUMrR1+OBE7NPSIGQlPMrokHE4QQSm5sckjFcUFLfpb2bsvTpeD84aciN/BmRV5lAcqlyzZ7wd/4fawaHXlmSBeeSIPYUIcP/3s4FvNmxofzgjoKbxsWdF8XfykFjo41kPClfWFr48WtPFmnZc1q7SvMMJgWCMeptYuBX/RchRRnRwOLde0chJ+GYzmDGDF5cdl4Ym93s4WB5wPgMNOUoyWpbMuiOK2AMdxBSu1ERmpAnu6WszOeZNGvaHlG/Xe5VpbD6RE/8U9X1zcTlsWH0V3JGeRjpUUuxoD7e4Cm3LLXwMm/enMhJ9VObGe9dA/uZuuoJUgtlylPSP5KzjtRM+JkMPnuVvOcjJlvzXFTfZNbtybPJh8w8d7W48bnru+jHeVEcGcQRG6wd88yDmylLhg20U4tdwZZHISKWeHEvM0dWUhn27zbGfAZwynauiOsTbRJz+Ps1bIpNxskkaO+6o0g8/Zujnf5yJx1xuWrjYzsUkreDF4qWiWHLokA0FBHndv2AyNWQd5lHdPkhJES96Gvf+mFj78kaL/N8GBQW8x584SRTygXvr/4+cMQRrz30B+yO4jwF998psUMzqbsQbk8tHGMuPj8UbnycvqnAz4uhyeyw79T+WN2qFVePX8RYn13yLnuqqDlagBqijegZUG2/lI5J8U3oKJc5NtklAsGLGwl4h3zfaF8e8VTt1egL6vxkWd7a5sH4Ls5SFEURVEURVEURVGUS34AZjgPkYgE6RgAAAAASUVORK5CYII=','data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAG4AAACNCAMAAABhVb/lAAAAP1BMVEUAAAAlGhj59/Tz7t6pqan17uFeVlRzcnLr3rJDOjiinpyXkpHn17VhW1huaWf/AAAAAAAAAAAAAAAAAAAAAAB3nwOjAAAAEHRSTlMA+w9MCITsBxTuZIxRpGYB1FMMyQAAAn5JREFUeNrtl9lywyAMRcUFAwYv//+3lUicxktMTd2HzujMdBonQhctgCFSFEVRFEVRFEVRFEVRFEVRFEVRFEVR/jsRsbM3uCFrbeR/VSxumjmGuidwaO4WMRC6anRd3JkghFAbxia7UBwntJpKWg9bnk4Fnz9uFbmA1STMOzEw9dQVm7XgT8ZtZo1MnhnTyUikUWwoYzP+Go7FvHniw3FCHYVvGxZ0Hyd/KgX2jpcj4UP5wruNl2H1zjpMa1HrH27G0fRA2HetXQz8oucapDg6Glks908n/DTu0xnEiCmTK8YTj3YXSxi4PwB2M03FW5LM9iyKwwwYwxWk1E9kJAfk6Wo6s/Ekk354Kz3qP8v1Mh0Oj/iJ/3Jb3UxYJh84uydyBmVb6VGSMeL6GqCplOzRcPLVYE7kJNuJ7ayX6sFdLB31BMnl0uUJyZ/JeSdqRgYZTD5fKp6TNvO92S+qT3Kvpcm9yRtMvLb0uPCl6mtvezkRXBkEkRvt1b2MHVvJC8Y3b4eWK4MiDkJDr3Bg3paKLKSjZZ5XBrzHcIi2bQvrE72F57E/Wub3dLNBEjkamk4E6bfv4nhXtszN6RukZZdU8mLwktEmOeQkAkBHmbLD0cEpbxpwmenKV0iJ6zC0H3ph8wkzzcXdHPlTPDBoTeZz8cgBFlw4PPjLexT/GMKS5dCazA8p5hffsqdFAYdddqNcaVp+P8bJ77fK1acz3O1w84L4ezncER3+TuWX0aFV+TXyBy5eZ4fs664JWq4GoK56A1omZNsvlc+g+AZUlYt8m4xywYCFbURGx3JfqN9ecdftFRjqarzl2cHa7gb4bg5SFEVRFEVRFEVRFOWUL4JzD5jiZC9uAAAAAElFTkSuQmCC'],
+  ],
+};
+const FACE_COMBO_REF = { boy:{cx:49.0,cy:72.5}, girl:{cx:55.0,cy:91.5} };
+
+const NAMES_M = ['太一','悠真','蓮','湊','陽翔','樹','大和','颯太','直哉','健','光','昇','圭吾','慎','遼','奏太','歩','司',
+  '拓海','智也','和也','大輝','翼','龍之介','蒼','新','元気','誠','剛','進','明','浩二','秀樹','俊介','雄大','翔太','海斗','悠斗'];
+const NAMES_F = ['葵','陽菜','凛','結衣','芽衣','咲良','心春','美月','千夏','楓','琴音','詩織','真帆','環','澪','萌','紬','杏',
+  '沙織','由美','麻衣','愛','桜','花','美咲','千尋','奈々','里奈','舞','彩','恵','智子','裕子','弥生','雫','茜','小春','日菜','るり'];
+
+/* ---------- 🔧職業タイプ（月給・出世率・失職率のバランス） ----------
+   base   : 役職Lv0の月給（月給=base×(1+0.25×Lv)+熱中度ボーナス）
+   promo  : 毎月の昇進確率
+   fire   : 毎月の失職確率
+   quitMul: 「熱中度20未満での自主退職」確率(quitBase)への倍率 ---------- */
+const JOB_TYPES = {
+  stable:    { label:'安定職',  base:6, promo:0.007, fire:0,    quitMul:0.2, enthMul:1, tag:'手堅く長く働ける' },
+  challenge: { label:'挑戦職',  base:9, promo:0.015, fire:P.fire, quitMul:1,  enthMul:1, tag:'稼げるが不安定' },
+  creative:  { label:'創作職',  base:4, promo:0.010, fire:0,    quitMul:1,   enthMul:2, tag:'夢中になるほど稼げる' }
+};
+const JOB_TITLES = ['見習い','一人前','熟練','重鎮'];
+
+/* ---------- 🔧進学先の判定ライン・給料ボーナス ----------
+   min: 18歳時点の(学業+スポーツ)/2 平均点がこの値以上で該当進学先になる
+   bonus: 生涯にわたる月給への倍率（配列は必ずmin降順で並べること） ---------- */
+const SCHOOLS = [
+  { key:'ichiryu', label:'一流大学', min:93, bonus:0.50 },
+  { key:'meimon', label:'名門校', min:80, bonus:0.30 },
+  { key:'good',   label:'よい学校', min:60, bonus:0.15 },
+  { key:'normal', label:'ふつうの学校', min:0,  bonus:0 }
+];
+
+/* 🔧性格8種のラベルと退場時コメント用の一言（quip）。各性格固有のボーナス数値は
+   PERS_EVENTSと、tickMonth内の「m.personality===」で検索すると各所に散らばっている
+   （例：ganbariの昇進率+0.3%、kenyakuの生活費半額、shikkariの意欲退職なし 等） */
+const PERSONALITIES = {
+  ochoko:{label:'おっちょこちょい',quip:'ちょっとおっちょこちょいなところもあったけれど'},
+  ganbari:{label:'がんばりや',quip:'いつも頑張り屋で'},
+  nonbiri:{label:'のんびりや',quip:'のんびり屋で'},
+  samishi:{label:'さみしがりや',quip:'寂しがりやだけど家族思いで'},
+  kimagure:{label:'きまぐれ',quip:'きまぐれだったけど憎めない'},
+  shikkari:{label:'しっかりもの',quip:'しっかり者で家族を支えた'},
+  roman:{label:'ロマンチスト',quip:'ロマンチストで'},
+  kenyaku:{label:'倹約家',quip:'倹約家で'}
+};
+const PERS_EVENTS = {
+  ochoko:[{t:'{name}は転んで買い物のお金を落としてしまった。（−3G）',fx:{money:-3}},
+    {t:'{name}の失敗談に家族みんなが大笑い。なんだか和んだ。（家族のハート+3）',fx:{famHeart:3}}],
+  ganbari:[{t:'{name}は夜遅くまで頑張りすぎて、少し疲れ気味だ。（ハート−5）',fx:{heart:-5}},
+    {t:'{name}の日頃の努力が認められ、臨時ボーナスが出た。（+10G）',fx:{money:10}}],
+  nonbiri:[{t:'{name}は縁側でうたた寝。とてもいい夢を見たらしい。（ハート+5）',fx:{heart:5}},
+    {t:'{name}はのんびりしすぎて仕事で少し叱られた。（熱中度−5）',fx:{enth:-5}}],
+  samishi:[{t:'{name}は家族と過ごす時間に、しみじみ幸せを感じた。（ハート+5）',fx:{heart:5}},
+    {t:'{name}はひとりの夜、少し沈んでいる。（ハート−5）',fx:{heart:-5}}],
+  kimagure:[{t:'{name}は気分が乗って、何をやっても冴えている。（熱中度+10）',fx:{enth:10}},
+    {t:'{name}は急に部屋の模様替えを始めた。気分一新。（ハート+3）',fx:{heart:3}}],
+  shikkari:[{t:'{name}が家計を見直して、むだな出費を減らした。（+5G）',fx:{money:5}},
+    {t:'{name}は今日も家族みんなの相談役だ。（家族のハート+2）',fx:{famHeart:2}}],
+  roman:[{t:'{name}は満天の星空を見上げて、胸がいっぱいになった。（ハート+8）',fx:{heart:8}},
+    {t:'{name}は理想が高すぎて、少し空回りしてしまった。（仲良し度−5）',fx:{affection:-5}}],
+  kenyaku:[{t:'{name}が市場で掘り出し物を見つけてきた。（ハートの実を入手）',fx:{item:'heartFruit'}},
+    {t:'{name}のケチぶりに、相手は少し呆れているようだ。（仲良し度−3）',fx:{affection:-3}}]
+};
+
+/* ---------- 🔧神棚のご加護（cost=月額の維持費、効果本体はtickMonth内に散在） ----------
+   実際の効果の数値は tickMonth() 内で kam==='kinben' などの分岐で直接
+   書かれている（例："pj = P.job + (kam==='kinben'?0.04:0)"）。
+   costだけでなく効果も変えたい場合は tickMonth 内を検索して調整すること。 ---------- */
+const KAMIDANA = {
+  kinben:{label:'勤勉のご加護',cost:30,desc:'就職しやすく、昇進もしやすくなる（効果2倍）'},
+  kodakara:{label:'子宝のご加護',cost:30,desc:'恋人ができやすく、子も授かりやすくなる（効果2倍）'},
+  gakugyo:{label:'学業のご加護',cost:40,desc:'子どもの学業・スポーツの伸びが良くなる（効果2倍）'},
+  akinai:{label:'商いのご加護',cost:50,desc:'家族みんなの月給が4割増える（効果2倍）'}
+};
+
+/* ---------- 🔧ショップの価格・効果（矢とアイテムの全リスト） ----------
+   priceを変えるだけで「持ち物」欄の買うボタンの金額に即反映される。
+   capがある矢は所持数の上限（フル在庫だと買うボタンが自動で無効化される）。
+   効果の中身（+15/-15等）は useArrow()/useItem() 関数内にあるので、
+   数値を変えたい場合はそちらも合わせて確認すること。 ---------- */
+const SHOP = [
+  { kind:'arrow', key:'ganbare',  name:'がんばれの矢', price:50,  desc:'熱中度+15（所持上限5本）', cap:5 },
+  { kind:'arrow', key:'ochitsuke',name:'おちつけの矢', price:50,  desc:'熱中度−15。0になると引退して旅に出る（所持上限5本）', cap:5 },
+  { kind:'arrow', key:'mezame',   name:'目覚めの矢',   price:100, desc:'興味をいまの時代の別のものに変える' },
+  { kind:'arrow', key:'koi',      name:'恋の矢',       price:80,  desc:'恋人・配偶者との仲良し度+15' },
+  { kind:'arrow', key:'wakare',   name:'別れの矢',     price:80,  desc:'仲良し度−15。0になると破局・離縁' },
+  { kind:'arrow', key:'aka',      name:'赤い羽根の矢', price:200, desc:'ハート+20（即効）' },
+  { kind:'arrow', key:'ao',       name:'青い羽根の矢', price:250, desc:'1年間ハートが減りにくくなる' },
+  { kind:'item',  key:'crown',    name:'世継ぎの王冠', price:150, desc:'次の後継ぎを指名する' },
+  { kind:'item',  key:'box',      name:'しあわせの箱', price:250, desc:'家族全員のハート+10' },
+  { kind:'item',  key:'heartFruit',name:'ハートの実',  price:300, desc:'ひとりのハートを全回復' }
+];
+const ARROWS_DEF = {
+  ganbare:{name:'がんばれの矢',desc:'熱中度+15'}, ochitsuke:{name:'おちつけの矢',desc:'熱中度−15'},
+  mezame:{name:'目覚めの矢',desc:'興味を変える'}, koi:{name:'恋の矢',desc:'仲良し度+15'},
+  wakare:{name:'別れの矢',desc:'仲良し度−15'}, aka:{name:'赤い羽根の矢',desc:'ハート+20'},
+  ao:{name:'青い羽根の矢',desc:'1年間ハート保護'}
+};
+const ITEMS_DEF = {
+  heartFruit:{name:'ハートの実',desc:'選んだ人のハートを100に全回復'},
+  crystal:{name:'先代の心の結晶',desc:'選んだ人の熱中度+25（世代交代で入手）'},
+  crown:{name:'世継ぎの王冠',desc:'選んだ人を次の後継ぎに指名'},
+  box:{name:'しあわせの箱',desc:'家族全員のハート+10'},
+  bookmark:{name:'時のしおり',desc:'家系が途絶えたとき、前の世代交代まで時を戻す'}
+};
+
+const EP = {
+  job:['{name}は{interest}への情熱が実り、{job}として働き始めた。','{name}に{job}の仕事が決まった。家族に嬉しい報告があった日。'],
+  promo:['{name}が{job}として腕を上げた。','{name}の働きぶりが認められ、{job}と呼ばれるようになった。'],
+  fire:['{name}の挑戦は一区切り。仕事を離れることになった。','時代の波は厳しく、{name}は仕事を失った。'],
+  teinen:['{name}は長年勤めた仕事を定年で退いた。ご苦労さまでした。','{name}が勤め上げ、静かに退職の日を迎えた。'],
+  quit:['{name}はやる気を失い、仕事を辞めてしまった。','{name}は悩んだ末、仕事を離れる決心をした。'],
+  lover:['{name}に恋人ができた。お相手は{lover}さんという。','{name}は最近そわそわしている。{lover}さんと恋仲になったらしい。'],
+  breakup:['{name}と{lover}は別々の道を歩むことになった。','{name}の恋は終わりを告げた。しばらくそっとしておこう。'],
+  divorce:['{name}と{lover}は離縁し、{lover}は家を出ていった。'],
+  succession:['{name}が第{gen}代の当主となり、{family}家の系譜を継いだ。','系譜は続く。{name}、第{gen}代当主の襲名である。'],
+  retireHead:['当主{name}は家督を譲り、旅に出た。'],
+  era:['時は流れ、世は「{era}」と呼ばれる時代へ移り変わった。'],
+  interest:['{name}は{interest}に夢中になり始めた。'],
+  branch:['{name}は{lover}さんと所帯を持ち、分家として家を出た。ふたりの幸せを祈ろう。'],
+  branchRecall:['本家に人が絶え、分家から{name}が呼び戻された。']
+};
+
+const ri=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+const chance=p=>Math.random()<p;
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const clamp=(v,lo,hi)=>Math.max(lo,Math.min(hi,v));
+function fill(tpl,map){ return tpl.replace(/\{(\w+)\}/g,(_,k)=>map[k]!==undefined?map[k]:'?'); }
+function yearsOf(mo){ return Math.floor(mo/12); }
+
+let S=null, autoTimer=null;
+function showToast(text){
+  if(typeof document==='undefined') return;
+  const t=document.createElement('div');
+  t.className='toast'; t.textContent=text;
+  document.body.appendChild(t);
+  requestAnimationFrame(()=>t.classList.add('show'));
+  setTimeout(()=>{ t.classList.remove('show'); setTimeout(()=>t.remove(),400); }, 4200);
+}
+
+function livingNames(){ return new Set(S.members.filter(m=>m.alive).map(m=>m.name)); }
+/* ---------- 見た目の遺伝（髪型・髪色・目・口・眉） ---------- */
+const HAIR_COLORS = [
+  { key:'brown', label:'茶色', filter:'none' },
+  { key:'black', label:'黒',   filter:'brightness(0.38) saturate(1.3)' },
+  { key:'navy',  label:'紺',   filter:'hue-rotate(150deg) saturate(2.2) brightness(0.8)' },
+  { key:'green', label:'緑',   filter:'hue-rotate(70deg) saturate(2.4) brightness(0.95)' },
+  { key:'ash',   label:'アッシュ', filter:'hue-rotate(-30deg) saturate(0.5) brightness(1.15)' }
+];
+const ELDER_HAIR_FILTER = 'grayscale(1) brightness(1.7)';
+/* ---------- 見た目の遺伝子(genome) ----------
+   hairIdx    : 髪型 0〜4（遺伝しない。結婚・出産のたび毎回ランダム）
+   hairColor  : 髪色キー（HAIR_COLORSのkey）。父母から50%継承、12%で突然変異
+   eyeIdx     : 目のインデックス 0〜7（FACE_COMBOSの添字）。同上で継承
+   mouthIdx   : 口のインデックス 0〜1（FACE_COMBOSの添字）。同上で継承
+   眉は1種類固定のため遺伝子には含まない。 ---------- */
+
+function randomGenome(gender){
+  return {
+    hairIdx: ri(0,4),
+    hairColor: pick(HAIR_COLORS).key,
+    eyeIdx: ri(0, 7),
+    mouthIdx: ri(0, 1)
+  };
+}
+function inheritGene(a,b,mutateP){
+  if(chance(mutateP)) return null; // nullは呼び出し側でランダム再抽選の合図
+  return chance(0.5)?a:b;
+}
+function inheritGenome(father, mother, gender){
+  const fg = father&&father.genome, mg = mother&&mother.genome;
+  if(!fg || !mg) return randomGenome(gender);
+  const mutateP = 0.12; // 🔧突然変異率（高いほど親と似ない子が増える）
+  let hairColor = inheritGene(fg.hairColor, mg.hairColor, mutateP);
+  if(hairColor===null) hairColor = pick(HAIR_COLORS).key;
+  let eyeIdx = inheritGene(fg.eyeIdx, mg.eyeIdx, mutateP);
+  if(eyeIdx===null) eyeIdx = ri(0, 7);
+  let mouthIdx = inheritGene(fg.mouthIdx, mg.mouthIdx, mutateP);
+  if(mouthIdx===null) mouthIdx = ri(0, 1);
+  return { hairIdx: ri(0,4), hairColor, eyeIdx, mouthIdx };
+}
+
+function genName(g){
+  const used=livingNames();
+  const pool=(g==='m'?NAMES_M:NAMES_F).filter(n=>!used.has(n));
+  return pick(pool.length?pool:(g==='m'?NAMES_M:NAMES_F));
+}
+function eraIdx(){ return Math.min(ERAS.length-1, Math.floor((S?S.totalMonths:0)/ERA_MONTHS)); }
+function active(m){ return m.alive && !m.retired && !m.left; }
+function activeMembers(){ return S.members.filter(active); }
+function byId(id){ return S.members.find(m=>m.id===id); }
+
+function newMember(o){
+  return Object.assign({
+    id:S.nextId++, name:'', gender:'m', role:'家族',
+    ageMonths:0, heart:80, enthusiasm:55,
+    interest:pick(INTERESTS[eraIdx()]), interestHistory:[],
+    job:null, personality:pick(Object.keys(PERSONALITIES)),
+    alive:true, retired:false, left:false, leftReason:null,
+    relStatus:'single', lover:null, spouseId:null, affection:0,
+    fatherId:null, motherId:null, childrenCount:0,
+    isHeir:false, heartBuffMonths:0, policy:'auto',
+    marriedIn:false, bornMonth:S.totalMonths, marriedMonth:null,
+    academicScore:50, athleticScore:50, school:null,
+    genome:null
+  },o);
+}
+
+function newGame(surname, firstName){
+  S = {
+    surname: surname||'見守',
+    totalMonths:0, money:50/*🔧初期資金*/, generation:1, nextId:1,
+    members:[], headId:null,
+    arrows:{ ganbare:3, ochitsuke:3, mezame:1, koi:1, wakare:1, aka:3, ao:2 },
+    items:{ heartFruit:1, crystal:0, crown:1, box:1, bookmark:1 },
+    kamidana:null, povertyMonths:0,
+    logs:[], rank:null, era:0,
+    ended:false, won:false, pending:null,
+    stats:{ births:0, deaths:0, longestLife:0, longestName:'—', bestRank:'—', headHistory:[] },
+    snapshot:null, ui:{selectedId:null}
+  };
+  const g = pick(['m','f']);
+  const head = newMember({
+    name: firstName || genName(g), gender:g, role:'世帯主',
+    ageMonths:20*12, heart:80, enthusiasm:55, bornMonth:-20*12,
+    genome: randomGenome(g)
+  });
+  head.job = { name:jobBaseName(head), type:'stable', level:0 };
+  head.interestHistory.push({interest:head.interest, startedMonth:0});
+  S.members.push(head);
+  S.headId = head.id;
+  S.stats.headHistory.push({gen:1, name:head.name, startMonth:0});
+  addLog(`${S.surname}家の系譜観察がはじまった。初代当主は${head.name}、二十歳の春。${head.interest}の仕事に就きながら家を興した。`, {imp:true, ids:[head.id]});
+  updateRank(true);
+  S.snapshot = makeSnapshot();
+}
+
+function makeSnapshot(){ const {snapshot, ...rest} = S; return JSON.stringify(rest); }
+function restoreSnapshot(){
+  const bmAfter = Math.max(0, S.items.bookmark - 1);
+  const restored = JSON.parse(S.snapshot);
+  restored.snapshot = S.snapshot;
+  S = restored;
+  S.items.bookmark = bmAfter;
+  S.ended=false; S.won=false; S.pending=null;
+  addLog('時のしおりが淡く光り、系譜は前の世代交代の頃へと巻き戻された。', {imp:true});
+}
+
+function addLog(text, opt={}){
+  S.logs.unshift({ m:S.totalMonths, text, imp:!!opt.imp, anniv:!!opt.anniv, ids:opt.ids||[] });
+  if(S.logs.length>400) S.logs.length = 400;
+}
+function ep(key, map, opt){ addLog(fill(pick(EP[key]), map), opt); }
+
+/* ---------- 続柄（世帯主から見た） ----------
+   世帯主を起点(o=0)に、fatherId/motherId（血縁・上方向）とspouseId（配偶・同世代）
+   のリンクをたどって全メンバーの相対世代(o)を固定点反復で求める。
+   o=-1は親、o=+1は子、o=+2は孫…という具合。
+   spouseの場合、それが「世帯主自身の配偶者」なのか「兄弟姉妹の配偶者」なのかを
+   headSpouseフラグで区別する（後者は「義兄弟/義姉妹」とラベル付けするため）。 ---------- */
+function computeRelations(head){
+  const off = new Map(); off.set(head.id,{o:0,sp:false,headSp:false});
+  let changed=true, guard=0;
+  while(changed && guard<20){
+    changed=false; guard++;
+    for(const m of S.members){
+      if(!off.has(m.id)) continue;
+      const cur=off.get(m.id);
+      if(m.spouseId && byId(m.spouseId) && !off.has(m.spouseId)){
+        off.set(m.spouseId,{o:cur.o, sp:true, headSp:(m.id===head.id)}); changed=true;
+      }
+      if(m.fatherId && !off.has(m.fatherId)){ off.set(m.fatherId,{o:cur.o-1,sp:false,headSp:false}); changed=true; }
+      if(m.motherId && !off.has(m.motherId)){ off.set(m.motherId,{o:cur.o-1,sp:false,headSp:false}); changed=true; }
+      const kids = S.members.filter(c=>c.fatherId===m.id||c.motherId===m.id);
+      for(const k of kids) if(!off.has(k.id)){ off.set(k.id,{o:cur.o+1,sp:false,headSp:false}); changed=true; }
+    }
+  }
+  return off;
+}
+const REL_BASE = {'-3':'祖々父母','-2':'祖父母','-1':null,'0':'本人','1':'子','2':'孫','3':'ひ孫','4':'玄孫'};
+function relationLabel(m, relMap, head){
+  if(m.id===head.id) return '世帯主';
+  const r = relMap.get(m.id);
+  if(!r) return '親族';
+  if(r.o===0 && r.sp && r.headSp) return '配偶者';
+  if(r.o===0 && r.sp && !r.headSp) return m.gender==='m'?'義兄弟':'義姉妹';
+  if(r.o===-1 && !r.sp) return m.gender==='m'?'父':'母';
+  let base = REL_BASE[String(r.o)];
+  if(base===undefined || base===null) base = r.o>0?`${r.o}代下の子孫`:`${-r.o}代上の親族`;
+  if(r.sp && r.o!==0) base = base+'の配偶者';
+  if(r.o===0 && !r.sp) base = '兄弟姉妹';
+  return base;
+}
+
+function salaryOf(m){
+  if(!m.job) return 0;
+  const jt = JOB_TYPES[m.job.type];
+  const enthBonus = Math.floor(m.enthusiasm/20) * jt.enthMul;
+  let sal = Math.round(jt.base * (1 + 0.25*m.job.level)) + enthBonus;
+  if(m.school){ const sc=SCHOOLS.find(s=>s.key===m.school); if(sc) sal = Math.round(sal*(1+sc.bonus)); }
+  return sal;
+}
+/* 🔧生活費（大人3G/子1G、倹約家は半額）。家計が苦しいと感じたら数値を下げる、
+   お金が余りすぎると感じたら上げる、で調整。JOB_TYPES.baseとのバランスに注意。 */
+function livingCostOf(m){
+  const base = m.ageMonths>=ADULT_M ? 3 : 1;
+  return m.personality==='kenyaku' ? Math.ceil(base/2) : base;
+}
+function jobBaseName(m){ return `${m.interest}の仕事`; }
+function jobLabel(m){
+  if(!m.job) return '無職';
+  const role = INTEREST_ROLE[m.interest] || m.job.name;
+  const prefix = JOB_TIER_PREFIX[m.job.level];
+  return `${prefix}${role}（${JOB_TYPES[m.job.type].label}）`;
+}
+function jobLabelShort(m){
+  if(!m.job) return '無職';
+  const role = INTEREST_ROLE[m.interest] || m.job.name;
+  return `${JOB_TIER_PREFIX[m.job.level]}${role}`;
+}
+
+/* ---------- 毎月の処理（ゲームのメインループ）----------
+   時間操作ボタン（1ヶ月/1年/100年）とオート再生は、いずれもこの関数を
+   繰り返し呼ぶだけ。1回の呼び出しで1ヶ月分だけ進む。
+   S.pending（分家するか後継ぎにするかの確認待ち）が立っている間は
+   何もせずreturnし、時間の進行を止める。 ---------- */
+function tickMonth(){
+  if(!S || S.ended || S.pending) return;
+  S.totalMonths++;
+
+  const e = eraIdx();
+  if(e!==S.era){ S.era=e; ep('era',{era:ERAS[e]},{imp:true}); }
+
+  const kam = S.kamidana;
+  const mems = activeMembers();
+
+  for(const m of mems){
+    if(!active(m)) continue;
+    m.ageMonths++;
+    const y = yearsOf(m.ageMonths);
+
+    /* 🔧ハート自然減衰：0.45(45%の月で-1)が基本。数値を下げるほど家族が幸せを保ちやすくなる */
+    let decay = chance(0.45)?1:0;
+    if(m.enthusiasm<30 && y>=15) decay += 1;
+    if(m.personality==='nonbiri' && chance(0.5)) decay = Math.max(0,decay-1);
+    if(m.heartBuffMonths>0){ decay = Math.max(0,decay-2); m.heartBuffMonths--; }
+    m.heart = clamp(m.heart-decay,0,100);
+
+    /* 🔧熱中度のゆらぎ：60歳以上はゆるやかに減退（自然引退への道）、それ未満は低迷から持ち直す
+       declineP＝60歳時点30%、年齢とともに上昇し最大+40%（＝70%）まで。
+       この値を下げると高齢者が長生き（引退しにくく）なり、上げると早く引退しやすくなる。 */
+    m.enthusiasm = clamp(m.enthusiasm + (chance(0.5)?1:-1)*ri(1,3), y>=60?0:5, 100);
+    if(y>=60){
+      const declineP = 0.30 + Math.min(0.4,(y-60)*0.02);
+      if(chance(declineP)) m.enthusiasm = clamp(m.enthusiasm-1,0,100);
+    } else if(m.enthusiasm<40){
+      m.enthusiasm += 1;
+    }
+
+    /* 興味の変化：6歳未満は「スポーツ」「学業」のどちらかへの子どもらしい傾向として扱う */
+    const pInt = m.personality==='kimagure' ? P.interest*2 : P.interest;
+    if(chance(pInt)){
+      const basePool = m.ageMonths<CHILD_MIN_M ? ['スポーツ','学業'] : INTERESTS[S.era];
+      const pool = basePool.filter(x=>x!==m.interest);
+      m.interest = pick(pool.length?pool:basePool);
+      m.interestHistory.push({interest:m.interest, startedMonth:S.totalMonths});
+      if(m.interestHistory.length>8) m.interestHistory.shift();
+      if(y>=10) ep('interest',{name:m.name,interest:m.interest},{ids:[m.id]});
+    }
+
+    /* 子ども時代：成績・スポーツ */
+    if(m.ageMonths>=CHILD_MIN_M && m.ageMonths<CHILD_MAX_M){
+      if(chance(P.schoolEvent)){
+        const gakuBonus = kam==='gakugyo' ? 2 : 1;
+        if(chance(0.5)){
+          const d = (ri(-4,7) + (m.personality==='ganbari'?2:0)) * gakuBonus;
+          m.academicScore = clamp(m.academicScore+d,0,100);
+          if(d>=4) addLog(`${m.name}はテストで良い点を取った。（学業+${d}）`,{ids:[m.id]});
+        }else{
+          const d = (ri(-4,7) + (Math.round((m.enthusiasm-50)/25))) * gakuBonus;
+          m.athleticScore = clamp(m.athleticScore+d,0,100);
+          if(d>=4) addLog(`${m.name}は運動会で活躍した。（スポーツ+${d}）`,{ids:[m.id]});
+        }
+      }
+    }
+    /* 18歳：進学先決定 */
+    if(m.ageMonths===ADULT_M){
+      const avg = (m.academicScore+m.athleticScore)/2;
+      const sc = SCHOOLS.find(s=>avg>=s.min);
+      m.school = sc.key;
+      addLog(`${m.name}は${sc.label}を卒業し、大人としての一歩を踏み出した。（学業${m.academicScore}・スポーツ${m.athleticScore}）`,{imp:true,ids:[m.id]});
+    }
+
+    /* 就職 */
+    if(!m.job && m.ageMonths>=22*12 && m.enthusiasm>=40){
+      let pj = P.job + (kam==='kinben'?0.04:0);
+      if(chance(pj)) assignJob(m);
+    }
+
+    /* 昇進・失職・退職 */
+    if(m.job){
+      const jt = JOB_TYPES[m.job.type];
+      let pPromo = jt.promo + (kam==='kinben'?0.01:0) + (m.personality==='ganbari'?0.003:0);
+      if(m.job.level<3 && m.enthusiasm>55 && m.heart>50 && chance(pPromo)){
+        m.job.level++;
+        ep('promo',{name:m.name,job:jobLabelShort(m)},{imp:true,ids:[m.id]});
+      }
+      if(m.job && jt.fire>0 && chance(jt.fire)){ ep('fire',{name:m.name},{imp:true,ids:[m.id]}); m.job=null; }
+      if(m.job && m.ageMonths>=RETIRE_JOB_AGE && chance(P.teinen)){ ep('teinen',{name:m.name},{imp:true,ids:[m.id]}); m.job=null; }
+      if(m.job && m.enthusiasm<20 && m.personality!=='shikkari'){
+        if(chance(P.quitBase*jt.quitMul)){ ep('quit',{name:m.name},{imp:true,ids:[m.id]}); m.job=null; }
+      }
+    }
+
+    /* 恋人ができる */
+    if(m.relStatus==='single' && m.ageMonths>=ADULT_M && m.ageMonths<=59*12){
+      let pl = P.lover + (kam==='kodakara'?0.06:0) + (m.personality==='roman'?0.03:0);
+      if(chance(pl)){
+        const lg = m.gender==='m'?'f':'m';
+        m.lover = { name:genName(lg), gender:lg,
+                    ageMonths: clamp(m.ageMonths+ri(-24,24), ADULT_M, 90*12),
+                    interest: pick(INTERESTS[S.era]), jobLevel: ri(0,2),
+                    sinceMonth:S.totalMonths, genome: randomGenome(lg) };
+        m.relStatus='dating'; m.affection=50;
+        ep('lover',{name:m.name,lover:m.lover.name},{imp:true,ids:[m.id]});
+      }
+    }
+
+    /* 交際中：仲良し度のゆらぎ（緩い上方ドリフト）・結婚・自然破局 */
+    if(m.relStatus==='dating' && m.lover){
+      m.lover.ageMonths++;
+      m.affection = clamp(m.affection + (m.personality==='samishi' ? ri(-3,4) : ri(-2,3)), 0, 100);
+      if(m.affection>=70 && chance(P.marry)){
+        tryMarry(m);
+      } else if(m.affection<20 && chance(P.breakup)){
+        ep('breakup',{name:m.name,lover:m.lover.name},{imp:true,ids:[m.id]});
+        m.lover=null; m.relStatus='single'; m.affection=0;
+      }
+    }
+    if(m.relStatus==='married'){
+      m.affection = clamp(m.affection + (chance(0.5)?1:-1)*ri(0,2), 5, 100);
+      const sp = byId(m.spouseId); if(sp) sp.affection = m.affection;
+    }
+
+    /* 出産 */
+    if(m.relStatus==='married' && m.gender==='f'
+       && m.ageMonths>=ADULT_M && m.ageMonths<=45*12
+       && m.childrenCount<MAX_CHILDREN
+       && activeMembers().length<MAX_FAMILY){
+      let pb = P.birth + (kam==='kodakara'?0.04:0);
+      if(chance(pb)) giveBirth(m);
+    }
+
+    if(chance(P.persEvent)) firePersonalityEvent(m);
+    if(m.enthusiasm<=0) checkJourneyRetirement(m);
+
+    /* 🔧死亡判定（39歳までは天寿を全うできる＝死なない、40歳から緩やかに発生）
+       全体的に死ににくくしたい→各数値を下げる／死にやすくしたい→上げる。
+       年齢の足切りライン(現在40)を変えたい場合は、この if(y>=40) と
+       直前の「39歳まで～」のコメント文言もあわせて書き換えること。 */
+    if(active(m) && y>=40){
+      let pd = 0.001;               // 40〜49歳の基礎値：年間およそ1.2%
+      if(y>=50) pd += 0.0003*(y-50); // 50歳以降、加齢とともに上昇
+      if(y>=70) pd += (y-70)*0.0015; // 70歳以降さらに加速
+      if(y>=85) pd += 0.02;          // 85歳以降は一段跳ね上がる
+      if(m.heart<=0) pd += 0.01;     // ハートが尽きていると追加リスク
+      if(chance(pd)) die(m);
+    }
+    if(S.ended || S.pending) return;
+  }
+
+  /* --- 家計 --- */
+  let income = activeMembers().reduce((s,m)=>s+salaryOf(m),0);
+  if(kam==='akinai') income = Math.round(income*1.4);
+  S.money += income;
+  const cost = activeMembers().reduce((s,m)=>s+livingCostOf(m),0);
+  if(S.money>=cost){
+    S.money -= cost;
+    if(income >= cost){ for(const m of activeMembers()) if(m.heart<90) m.heart = clamp(m.heart+1,0,90); }
+    if(S.povertyMonths>0){ addLog('家計が持ち直し、食卓に温かさが戻った。'); S.povertyMonths=0; }
+  }else{
+    S.money = 0; S.povertyMonths++;
+    const dmg = Math.min(1+S.povertyMonths, 3);  // 🔧困窮ダメージ。上限3を上げると詰みやすくなる
+    for(const m of activeMembers()) m.heart = clamp(m.heart-dmg,0,100);
+    if(S.povertyMonths===1) addLog('家計が苦しく、食卓が寂しくなってきた……。（困窮）',{imp:true});
+  }
+
+  if(S.kamidana){
+    const k = KAMIDANA[S.kamidana];
+    if(S.money>=k.cost) S.money -= k.cost;
+    else{ showToast(`お供えが尽きて、${k.label}が消えてしまった。`); S.kamidana=null; }
+  }
+  if(chance(P.itemGain)){
+    const key = pick(['heartFruit','box']);
+    S.items[key]++;
+    addLog(`神棚の前に${ITEMS_DEF[key].name}が供えられていた。ありがたく頂戴する。`);
+  }
+  if(S.totalMonths % BOOKMARK_MONTHS === 0){ S.items.bookmark++; addLog('長い見守りの証として「時のしおり」を授かった。',{imp:true}); }
+  if(S.totalMonths % ANNIV_MONTHS === 0){
+    const y = yearsOf(S.totalMonths);
+    addLog(`――見守り${y}年の節目。第${S.generation}代、家族${activeMembers().length}人。これまでに${S.stats.births}人が生まれ、${S.stats.deaths}人を見送った。蓄えは${S.money}G。`,{anniv:true});
+  }
+  updateRank();
+  if(S.totalMonths>=GOAL_MONTHS){ S.ended=true; S.won=true; }
+}
+
+function assignJob(m){
+  let type;
+  if(m.policy==='stable') type='stable';
+  else if(m.policy==='challenge') type='challenge';
+  else type = pick(['stable','challenge','creative']);
+  m.job = { name:jobBaseName(m), type, level:0 };
+  ep('job',{name:m.name,interest:m.interest,job:jobLabel(m)},{imp:true,ids:[m.id]});
+}
+
+/* ---------- 結婚（分家判定→必要なら保留） ----------
+   家族枠(MAX_FAMILY)が満杯で、結婚する本人が後継ぎ／世帯主でない場合、
+   即座に分家させず S.pending をセットしてプレイヤーの判断を待つ。
+   （tickMonth冒頭のガードにより、pending中は時間が進まない＝結婚の
+   確率ロールも保留されたまま維持される） ---------- */
+function tryMarry(m){
+  const lv = m.lover;
+  const mustStay = m.isHeir || m.id===S.headId;
+  if(!mustStay && activeMembers().length>=MAX_FAMILY){
+    S.pending = { type:'branch', memberId:m.id, loverName:lv.name, loverGender:lv.gender };
+    return;
+  }
+  marry(m);
+}
+function resolvePendingBranch(makeHeir){
+  const pend = S.pending; if(!pend) return;
+  const m = byId(pend.memberId);
+  S.pending = null;
+  if(!m || !m.lover) return;
+  if(makeHeir){
+    const sibs = S.members.filter(c=>c.id!==m.id && ((c.fatherId===m.fatherId&&m.fatherId!=null)||(c.motherId===m.motherId&&m.motherId!=null)));
+    for(const s of sibs) s.isHeir=false;
+    m.isHeir = true;
+    marry(m);
+    addLog(`${m.name}を後継ぎとし、${pend.loverName}さんを家に迎えることにした。`,{imp:true,ids:[m.id]});
+  }else{
+    branchOut(m);
+  }
+}
+function marry(m){
+  const lv = m.lover;
+  const sp = newMember({
+    name:lv.name, gender:lv.gender, role:'配偶者',
+    ageMonths:lv.ageMonths, heart:75, enthusiasm:ri(45,65),
+    relStatus:'married', spouseId:m.id, affection:m.affection,
+    marriedIn:true, marriedMonth:S.totalMonths,
+    bornMonth:S.totalMonths-lv.ageMonths,
+    interest:lv.interest, school:pick(['meimon','good','normal']),
+    genome: lv.genome || randomGenome(lv.gender)
+  });
+  if(lv.jobLevel>0 && chance(0.6)) sp.job = { name:jobBaseName(sp), type:pick(['stable','challenge','creative']), level:lv.jobLevel };
+  sp.interestHistory.push({interest:sp.interest, startedMonth:S.totalMonths});
+  S.members.push(sp);
+  m.relStatus='married'; m.spouseId=sp.id; m.lover=null; m.marriedMonth=S.totalMonths;
+  addLog(fill(pick(['{name}と{lover}が祝言を挙げた。家族がひとり増えた。','{name}は{lover}と夫婦になった。にぎやかな祝いの日だった。']),{name:m.name,lover:sp.name}),{imp:true,ids:[m.id,sp.id]});
+  showToast(`おめでとう！${m.name}と${sp.name}、ふたりの門出を祝って。`);
+}
+function branchOut(m){
+  const lv = m.lover;
+  m.left=true; m.leftReason='branch';
+  m.relStatus='married'; m.lover=null; m.marriedMonth=S.totalMonths; m.job=null;
+  ep('branch',{name:m.name,lover:lv.name},{imp:true,ids:[m.id]});
+  showToast(`${m.name}は${lv.name}さんと分家として独立した。`);
+  if(S.ui.selectedId===m.id) S.ui.selectedId=null;
+}
+
+function giveBirth(mother){
+  const g = pick(['m','f']);
+  const father = byId(mother.spouseId);
+  const child = newMember({
+    name:genName(g), gender:g, role:'子',
+    ageMonths:0, heart:90, enthusiasm:50,
+    motherId:mother.id, fatherId:mother.spouseId,
+    academicScore:ri(40,60), athleticScore:ri(40,60),
+    interest: pick(['スポーツ','学業']),
+    genome: inheritGenome(father, mother, g)
+  });
+  child.interestHistory.push({interest:child.interest, startedMonth:S.totalMonths});
+  S.members.push(child);
+  mother.childrenCount++;
+  if(father) father.childrenCount++;
+  S.stats.births++;
+  addLog(fill(pick(['{mother}に赤ちゃんが生まれた。{child}と名付けられた。','新しい産声が響いた。{child}の誕生だ。家中がお祝いに包まれた。']),{mother:mother.name,child:child.name}),{imp:true,ids:[mother.id,child.id]});
+  showToast(`${child.name}が生まれました。健やかに育ちますように。`);
+}
+
+function firePersonalityEvent(m){
+  const ev = pick(PERS_EVENTS[m.personality]);
+  const fx = ev.fx;
+  if(fx.affection!==undefined && m.relStatus==='single') return;
+  addLog(fill(ev.t,{name:m.name}),{ids:[m.id]});
+  if(fx.money) S.money = Math.max(0,S.money+fx.money);
+  if(fx.heart) m.heart = clamp(m.heart+fx.heart,0,100);
+  if(fx.enth)  m.enthusiasm = clamp(m.enthusiasm+fx.enth,5,100);
+  if(fx.famHeart) for(const x of activeMembers()) x.heart=clamp(x.heart+fx.famHeart,0,100);
+  if(fx.affection && m.relStatus!=='single'){
+    m.affection = clamp(m.affection+fx.affection,0,100);
+    const sp = byId(m.spouseId); if(sp) sp.affection=m.affection;
+  }
+  if(fx.item) S.items[fx.item]++;
+}
+
+/* ---------- 引退（旅立ち） ----------
+   熱中度が0になった18歳以上のメンバーが対象。死亡ではなく「離脱」として
+   扱われ、家族枠が1つ空く。世帯主は後継ぎがいない限り引退できない
+   （踏みとどまる）。配偶者が先に引退済みなら専用のねぎらいログを出す。 ---------- */
+function checkJourneyRetirement(m){
+  if(!active(m) || m.enthusiasm>0 || m.ageMonths<ADULT_M) return;
+  if(m.id===S.headId){
+    const heirs = childrenOf(m).filter(c=>active(c));
+    if(heirs.length===0 && activeMembers().length<=1){
+      m.enthusiasm=5;
+      addLog(`${m.name}は旅に憧れたが、継ぐ者なき家を思い、踏みとどまった。`,{ids:[m.id]});
+      return;
+    }
+    ep('retireHead',{name:m.name},{imp:true,ids:[m.id]});
+    addLog(generateFarewell(m,'retire'),{imp:true,ids:[m.id]});
+    showToast(generateFarewell(m,'retire'));
+    m.retired=true; m.job=null;
+    succeed(m,'retire');
+    return;
+  }
+  m.retired=true; m.job=null;
+  const sp = m.spouseId ? byId(m.spouseId) : null;
+  let msg;
+  if(sp && sp.retired && sp.alive){
+    msg = fill(pick(['{name}は、先に旅立った{spouse}とともに引退することにした。ふたりの旅路に幸あれ。']),{name:m.name,spouse:sp.name});
+  }else{
+    msg = fill(pick(['{name}は静かに日常を離れ、あてのない旅に出た。','{name}は「やりきった」とだけ言い残し、旅立っていった。']),{name:m.name});
+  }
+  addLog(msg,{imp:true,ids:[m.id]});
+  addLog(generateFarewell(m,'retire'),{imp:true,ids:[m.id]});
+  showToast(generateFarewell(m,'retire'));
+  if(m.lover){ m.lover=null; m.relStatus='single'; }
+  if(S.ui.selectedId===m.id) S.ui.selectedId=null;
+}
+function childrenOf(parent){ return S.members.filter(c=>c.fatherId===parent.id || c.motherId===parent.id); }
+
+/* ---------- 一言コメント生成 ---------- */
+function generateFarewell(m){
+  const y = yearsOf(m.ageMonths);
+  const quip = PERSONALITIES[m.personality].quip;
+  const mainInt = (m.interestHistory[0]||{}).interest || m.interest;
+  let famPart = m.childrenCount>0 ? `${m.childrenCount}人の子を育て、` : '';
+  const sp = m.spouseId?byId(m.spouseId):null;
+  let spousePart = sp ? `${sp.name}さんとともに歩み、` : '';
+  return `${y}年の人生、${quip}${mainInt}を愛した一生でした。${famPart}${spousePart}よい人生でした。`;
+}
+
+/* ---------- 死亡・世代交代 ---------- */
+function die(m){
+  m.alive=false; m.job=null;
+  S.stats.deaths++;
+  const y = yearsOf(m.ageMonths);
+  if(y>S.stats.longestLife){ S.stats.longestLife=y; S.stats.longestName=m.name; }
+  addLog(fill(pick(['{name}が静かに息を引き取った。享年{age}。安らかに。','{name}がその生涯を終えた。享年{age}。長い見守りに感謝を。']),{name:m.name,age:y}),{imp:true,ids:[m.id]});
+  const fw = generateFarewell(m);
+  addLog(fw,{imp:true,ids:[m.id]});
+  showToast(fw);
+  const sp = m.spouseId?byId(m.spouseId):null;
+  if(sp && sp.alive){ sp.relStatus='single'; sp.spouseId=null; sp.affection=0; }
+  if(S.ui.selectedId===m.id) S.ui.selectedId=null;
+  if(m.id===S.headId) succeed(m,'death');
+}
+
+function succeed(prev,cause){
+  const kids = childrenOf(prev).filter(c=>active(c));
+  let next = kids.find(c=>c.isHeir) || null;
+  if(!next && kids.length) next = kids.slice().sort((a,b)=>b.ageMonths-a.ageMonths)[0];
+  if(!next){
+    const others = activeMembers().filter(x=>x.id!==prev.id);
+    next = others.length ? others.slice().sort((a,b)=>b.ageMonths-a.ageMonths)[0] : null;
+  }
+  if(!next){
+    const branch = S.members.filter(x=>x.alive && x.left && x.leftReason==='branch' && yearsOf(x.ageMonths)<70);
+    if(branch.length){
+      next = branch.slice().sort((a,b)=>a.ageMonths-b.ageMonths)[0];
+      next.left=false; next.leftReason=null; next.relStatus='single'; next.spouseId=null;
+      ep('branchRecall',{name:next.name},{imp:true,ids:[next.id]});
+    }
+  }
+  const hh = S.stats.headHistory;
+  if(hh.length) hh[hh.length-1].endMonth = S.totalMonths;
+  if(!next){ S.ended=true; S.won=false; return; }
+  S.generation++;
+  S.headId = next.id;
+  next.isHeir = false;
+  hh.push({gen:S.generation, name:next.name, startMonth:S.totalMonths});
+  ep('succession',{name:next.name,gen:S.generation,family:S.surname},{imp:true,ids:[next.id]});
+  if(S.generation % 5 === 0) addLog(`――第${S.generation}代の節目。${S.surname}家の系譜は途切れることなく続いている。`,{anniv:true});
+  S.items.crystal++;
+  S.snapshot = makeSnapshot();
+}
+
+/* 🔧家族ランクの境目（平均ハートがこの数値を超えるとランクアップ）。
+   数値を下げるほど「きらぴかな家族」になりやすくなる */
+function rankOf(avg){
+  if(avg<30) return 'キケンな家族'; if(avg<50) return 'ふつうの家族';
+  if(avg<70) return 'にぎやかな家族'; if(avg<85) return 'しあわせな家族';
+  return 'きらぴかな家族';
+}
+const RANK_ORDER=['キケンな家族','ふつうの家族','にぎやかな家族','しあわせな家族','きらぴかな家族'];
+function updateRank(silent){
+  const ms = activeMembers(); if(!ms.length) return;
+  const avg = ms.reduce((s,m)=>s+m.heart,0)/ms.length;
+  const r = rankOf(avg);
+  if(r!==S.rank){
+    if(!silent && S.rank) addLog(`家族のようすが変わった。いまは「${r}」だ。`,{imp:true});
+    S.rank=r;
+    if(RANK_ORDER.indexOf(r) > RANK_ORDER.indexOf(S.stats.bestRank) || S.stats.bestRank==='—') S.stats.bestRank=r;
+  }
+}
+
+/* ---------- 矢・アイテムの使用 ---------- */
+function selected(){ const m=S.ui.selectedId?byId(S.ui.selectedId):null; return m&&active(m)?m:null; }
+
+function useArrow(key){
+  const m = selected();
+  if(!m || S.arrows[key]<=0) return;
+  let ok = true;
+  switch(key){
+    case 'ganbare': m.enthusiasm=clamp(m.enthusiasm+15,0,100);
+      showToast(`がんばれの矢が${m.name}に届いた。目の輝きが増した。（熱中度+15）`); break;
+    case 'ochitsuke': m.enthusiasm=clamp(m.enthusiasm-15,0,100);
+      showToast(`おちつけの矢が${m.name}に届いた。すっと肩の力が抜けた。（熱中度−15）`); break;
+    case 'aka': m.heart=clamp(m.heart+20,0,100);
+      showToast(`赤い羽根の矢が${m.name}の心を温めた。（ハート+20）`); break;
+    case 'ao': m.heartBuffMonths+=12;
+      showToast(`青い羽根の矢が${m.name}をやさしく包んだ。（1年間ハート保護）`); break;
+    case 'mezame': {
+      const pool = INTERESTS[S.era].filter(x=>x!==m.interest);
+      m.interest = pick(pool);
+      m.interestHistory.push({interest:m.interest, startedMonth:S.totalMonths});
+      if(m.interestHistory.length>8) m.interestHistory.shift();
+      showToast(`目覚めの矢が${m.name}を貫いた。突然、${m.interest}が気になって仕方がない。`);
+      break;
+    }
+    case 'koi':
+      if(m.relStatus==='single'){ ok=false; break; }
+      m.affection=clamp(m.affection+15,0,100);
+      { const sp=byId(m.spouseId); if(sp) sp.affection=m.affection; }
+      showToast(`恋の矢が${m.name}に命中。ふたりの仲がぐっと縮まった。（仲良し度+15）`);
+      break;
+    case 'wakare':
+      if(m.relStatus==='single'){ ok=false; break; }
+      m.affection=clamp(m.affection-15,0,100);
+      { const sp=byId(m.spouseId); if(sp) sp.affection=m.affection; }
+      showToast(`別れの矢が${m.name}に刺さった。心に隙間風が吹く。（仲良し度−15）`);
+      if(m.affection<=0){
+        if(m.relStatus==='dating' && m.lover){
+          ep('breakup',{name:m.name,lover:m.lover.name},{imp:true,ids:[m.id]});
+          m.lover=null; m.relStatus='single';
+        }else if(m.relStatus==='married'){
+          const sp=byId(m.spouseId);
+          const leaver = sp && sp.marriedIn ? sp : (m.marriedIn ? m : sp);
+          const stayer = leaver===m ? sp : m;
+          if(leaver && stayer){
+            ep('divorce',{name:stayer.name,lover:leaver.name},{imp:true,ids:[stayer.id,leaver.id]});
+            leaver.left=true; leaver.relStatus='single'; leaver.spouseId=null;
+            stayer.relStatus='single'; stayer.spouseId=null; stayer.affection=0;
+            if(S.ui.selectedId===leaver.id) S.ui.selectedId=null;
+          }
+        }
+      }
+      break;
+  }
+  if(ok){ S.arrows[key]--; if(m.enthusiasm<=0) checkJourneyRetirement(m); }
+  render();
+}
+
+function useItem(key){
+  if(S.items[key]<=0) return;
+  if(key==='box'){
+    for(const m of activeMembers()) m.heart=clamp(m.heart+10,0,100);
+    S.items.box--;
+    showToast('しあわせの箱を開けた。家中があたたかい光に包まれた。（全員ハート+10）');
+    updateRank(); render(); return;
+  }
+  const m = selected();
+  if(!m) return;
+  switch(key){
+    case 'heartFruit':
+      m.heart=100; S.items.heartFruit--;
+      showToast(`${m.name}はハートの実を口にした。心の底から力が湧いてくる。（ハート全回復）`);
+      break;
+    case 'crystal':
+      m.enthusiasm=clamp(m.enthusiasm+25,5,100); S.items.crystal--;
+      showToast(`先代の心の結晶が${m.name}の胸に宿った。想いは受け継がれる。（熱中度+25）`);
+      break;
+    case 'crown': {
+      const sibs = S.members.filter(c=>(c.fatherId===m.fatherId&&m.fatherId!=null)||(c.motherId===m.motherId&&m.motherId!=null));
+      for(const s of sibs) s.isHeir=false;
+      m.isHeir=true; S.items.crown--;
+      addLog(`世継ぎの王冠が${m.name}の頭上に輝いた。次の当主はこの子に決まりだ。`,{imp:true,ids:[m.id]});
+      showToast(`${m.name}を次の後継ぎに指名した。`);
+      break;
+    }
+  }
+  updateRank(); render();
+}
+
+function buy(entry){
+  if(S.money<entry.price) return;
+  if(entry.kind==='arrow'){ if(entry.cap && S.arrows[entry.key]>=entry.cap) return; S.arrows[entry.key]++; }
+  else{ S.items[entry.key]++; }
+  S.money-=entry.price;
+  showToast(`${entry.name}を${entry.price}Gで買い求めた。`);
+  render();
+}
+
+/* =====================================================
+   UI（ブラウザでのみ実行）
+   ===================================================== */
+if (typeof document !== 'undefined') {
+
+const $ = id=>document.getElementById(id);
+
+function moodWord(h){
+  if(h>=85)return '絶好調'; if(h>=70)return '元気'; if(h>=50)return 'ふつう';
+  if(h>=30)return '元気がない'; return '沈んでいる';
+}
+function ageBand(m){ const y=yearsOf(m.ageMonths); if(y<6)return 'baby'; if(y<18)return 'child'; if(y<65)return 'adult'; return 'elder'; }
+function faceOf(m){
+  const b=ageBand(m);
+  if(b==='baby') return '👶';
+  if(b==='child') return m.gender==='m'?'👦':'👧';
+  if(b==='adult') return m.gender==='m'?'👨':'👩';
+  return m.gender==='m'?'👴':'👵';
+}
+function faceOfLover(lv){
+  const y=yearsOf(lv.ageMonths);
+  if(y<18) return lv.gender==='m'?'👦':'👧';
+  if(y<65) return lv.gender==='m'?'👨':'👩';
+  return lv.gender==='m'?'👴':'👵';
+}
+function fmtWhen(mo){ return `${yearsOf(mo)}年${mo%12+1}月`; }
+
+/* ---------- 赤ちゃんの顔（0〜5歳専用、SVG生成） ----------
+   専用のイラスト素材は使わず、肌色の円＋実イラストの目・口パーツを
+   小さく配置し、性別はリボン(女)/前髪タフト(男)のみで区別する簡易版。 ---------- */
+function babyPortraitHTML(gender, px){
+  const skin='#FBE0BE', ribbon = gender==='f' ? '#E88AA0' : '#7FAAD6';
+  const boxH = Math.round(px*0.92);
+  const eyeAsset = FACE_PARTS.eyes[0], mouthAsset = FACE_PARTS.mouths[0];
+  const eyeW = px*0.34, eyeScale = eyeW/eyeAsset.w, eyeH = eyeAsset.h*eyeScale;
+  const mouthW = px*0.16, mouthScale = mouthW/mouthAsset.w, mouthH = mouthAsset.h*mouthScale;
+  const accessory = gender==='f'
+    ? `<circle cx="${px*0.5}" cy="${px*0.16}" r="${px*0.06}" fill="${ribbon}"/><circle cx="${px*0.42}" cy="${px*0.18}" r="${px*0.045}" fill="${ribbon}"/><circle cx="${px*0.58}" cy="${px*0.18}" r="${px*0.045}" fill="${ribbon}"/>`
+    : `<path d="M ${px*0.42} ${px*0.2} Q ${px*0.5} ${px*0.08} ${px*0.58} ${px*0.2}" stroke="${ribbon}" stroke-width="${px*0.05}" fill="none" stroke-linecap="round"/>`;
+  return `<div style="width:${px}px;height:${boxH}px;position:relative;flex:none">
+    <svg viewBox="0 0 ${px} ${boxH}" width="${px}" height="${boxH}" style="position:absolute;left:0;top:0">
+      <circle cx="${px*0.5}" cy="${boxH*0.54}" r="${px*0.4}" fill="${skin}"/>
+      ${accessory}
+    </svg>
+    <img src="${eyeAsset.src}" style="position:absolute;left:${px*0.5-eyeW/2}px;top:${boxH*0.5-eyeH/2}px;width:${eyeW}px;height:${eyeH}px">
+    <img src="${mouthAsset.src}" style="position:absolute;left:${px*0.5-mouthW/2}px;top:${boxH*0.68-mouthH/2}px;width:${mouthW}px;height:${mouthH}px">
+  </div>`;
+}
+
+/* ---------- 顔ポートレート描画（髪10種＋事前合成済み目口鼻パーツの合成） ----------
+   entity は 家族メンバー(member) または 恋人(lover) オブジェクト。
+   どちらも {gender, ageMonths, genome} を持っていれば動作する。
+   px は表示したいサイズ(px)。実サイズ(w×h)からscaleを計算し、
+   transform:scaleで縮小表示することでレイアウト崩れを防いでいる。
+
+   顔パーツの位置決めは「基準髪型とのcx/cyの差分だけ平行移動」という
+   一発勝負の方式（FACE_COMBOSのコメントも参照）。
+   65歳以上は髪色を強制的にグレーに上書きする。 ---------- */
+function portraitHTML(entity, px){
+  const y = yearsOf(entity.ageMonths);
+  if(y<6 || !entity.genome){
+    return babyPortraitHTML(entity.gender==='m'?'m':'f', px);
+  }
+  const genderKey = entity.gender==='m'?'boy':'girl';
+  const pool = FACE_ASSETS[genderKey];
+  const asset = pool[clamp(entity.genome.hairIdx,0,4)];
+  const colorDef = HAIR_COLORS.find(c=>c.key===entity.genome.hairColor) || HAIR_COLORS[0];
+  const filter = (y>=65) ? ELDER_HAIR_FILTER : colorDef.filter;
+  const w=asset.w, h=asset.h, scale=px/w;
+
+  /* 事前合成済みの「目+鼻+口」コンボ画像を、基準髪型とのcx/cyのズレ分だけ平行移動して重ねる */
+  const ref = FACE_COMBO_REF[genderKey];
+  const offX = asset.cx - ref.cx, offY = asset.cy - ref.cy;
+  const comboSrc = FACE_COMBOS[genderKey][clamp(entity.genome.eyeIdx,0,7)][clamp(entity.genome.mouthIdx,0,1)];
+
+  const parts = `<img src="${comboSrc}" style="position:absolute;left:${offX}px;top:${offY}px;width:${w}px;height:${h}px">`;
+
+  const boxH = Math.round(px*h/w);
+  return `<div style="width:${px}px;height:${boxH}px;overflow:hidden;position:relative;flex:none">
+    <div style="position:relative;width:${w}px;height:${h}px;transform:scale(${scale});transform-origin:top left;">
+      <img src="${asset.skin}" style="position:absolute;left:0;top:0;width:${w}px;height:${h}px">
+      <img src="${asset.hair}" style="position:absolute;left:0;top:0;width:${w}px;height:${h}px;filter:${filter}">
+      ${parts}
+    </div>
+  </div>`;
+}
+
+function render(){
+  if(!S) return;
+  $('crest').textContent = S.surname.charAt(0);
+  $('hdFamily').textContent = `${S.surname}家`;
+  $('hdTime').textContent = `${yearsOf(S.totalMonths)}年${S.totalMonths%12}月`;
+  $('hdEra').textContent = ERAS[S.era];
+  $('hdGen').textContent = S.generation===1?'初代':`第${S.generation}代`;
+  $('hdFamCount').textContent = `${activeMembers().length}/${MAX_FAMILY}`;
+  $('hdRank').textContent = S.rank||'—';
+  $('hdMoney').textContent = `${S.money}G`;
+
+  renderMembers();
+  renderProfile();
+  renderInv();
+  renderKamidana();
+  renderLogs();
+
+  if(S.pending) showPending();
+  else $('pendingOverlay').classList.remove('show');
+
+  if(S.ended) showResult();
+}
+
+function renderMembers(){
+  const list = $('memberList'); list.innerHTML='';
+  const head = byId(S.headId);
+  const relMap = computeRelations(head);
+  const ms = activeMembers().slice().sort((a,b)=>{
+    const oa=relMap.get(a.id), ob=relMap.get(b.id);
+    const wa = oa?Math.abs(oa.o)*2+(oa.sp?1:0):99, wb = ob?Math.abs(ob.o)*2+(ob.sp?1:0):99;
+    return wa-wb || b.ageMonths-a.ageMonths;
+  });
+  for(const m of ms){
+    const rel = relationLabel(m, relMap, head);
+    const isHead = m.id===S.headId;
+    const heartCrit = m.heart<30, enthCrit = m.enthusiasm<20 && yearsOf(m.ageMonths)<60;
+    let jobText = m.job?jobLabelShort(m):'無職';
+    if(m.ageMonths>=CHILD_MIN_M && m.ageMonths<CHILD_MAX_M){
+      jobText = `<span class="schoolscore">学${m.academicScore} 運${m.athleticScore}</span>`;
+    }
+    const d=document.createElement('div');
+    d.className='member-row'+(S.ui.selectedId===m.id?' selected':'');
+    d.innerHTML = `
+      <div class="mr-line1">
+        <span>${portraitHTML(m,22)}</span>
+        <span class="nm">${m.name}</span>
+        <span class="rel${isHead?' head':''}">${rel}</span>
+        ${m.isHeir?'<span title="後継ぎ">👑</span>':''}
+        <span class="age">${yearsOf(m.ageMonths)}歳</span>
+      </div>
+      <div class="mr-line2">
+        <span class="job">${jobText}</span>
+        <span class="numwrap ${heartCrit?'crit':''}">❤<span class="mbar h"><i style="width:${m.heart}%"></i></span>${m.heart}${heartCrit?'!':''}</span>
+        <span class="numwrap ${enthCrit?'crit':''}">🔥<span class="mbar e"><i style="width:${m.enthusiasm}%"></i></span>${m.enthusiasm}${enthCrit?'!':''}</span>
+      </div>`;
+    d.onclick=()=>{ S.ui.selectedId=m.id; render(); };
+    list.appendChild(d);
+  }
+  const departed = S.members.filter(m=>!active(m));
+  const box=$('departedBox');
+  if(departed.length){
+    box.style.display='block';
+    $('departedSummary').textContent = `旅立った人・見送った人（${departed.length}）`;
+    const dl=$('departedList'); dl.innerHTML='';
+    for(const m of departed.slice(-6).reverse()){
+      const tag = !m.alive?'享年'+yearsOf(m.ageMonths):(m.retired?'旅の空の下':(m.leftReason==='branch'?'分家':'家を出た'));
+      const div=document.createElement('div');
+      div.className='dm'+(!m.alive?' dead':'');
+      div.innerHTML=`<span class="dnm">${m.name}</span> — ${tag}`;
+      dl.appendChild(div);
+    }
+  } else box.style.display='none';
+}
+
+function flavorText(m){
+  const h=m.heart, e=m.enthusiasm;
+  if(h>=70&&e>=70) return `今は絶好調。${m.interest}のことになると、時間を忘れて打ち込んでいる。`;
+  if(h>=70&&e<40)  return `心は穏やかだが、少し退屈しているのかもしれない。`;
+  if(h<40&&e>=60)  return `少し元気がないけれど、${m.interest}のことだけは忘れていない。`;
+  if(h<40&&e<40)   return `心も体も休みたい時期のようだ。そっと見守るか、そっと矢を放つか。`;
+  return `${m.interest}に向き合いながら、穏やかな日々を過ごしている。`;
+}
+
+function renderProfile(){
+  const body=$('profileBody');
+  const m=selected();
+  if(!m){ body.innerHTML='<div class="no-select">家族一覧から、見守りたい人を選んでください。</div>'; return; }
+
+  const myLogs = S.logs.filter(l=>l.ids.includes(m.id)).slice(0,3)
+    .map(l=>`<li>${fmtWhen(l.m)}　${l.text}</li>`).join('') || '<li>まだ大きな出来事はない。</li>';
+  const sal=salaryOf(m);
+  const isChild = m.ageMonths>=CHILD_MIN_M && m.ageMonths<CHILD_MAX_M;
+
+  let loveHtml = '';
+  if(m.relStatus==='dating' && m.lover){
+    const lv=m.lover;
+    const yy=yearsOf(S.totalMonths-lv.sinceMonth);
+    loveHtml = `<div class="love-box" style="flex:1;margin-top:0">${portraitHTML(lv,34)}
+      <div class="ldetail"><b>${lv.name}</b>さん（交際${yy}年・仲良し度${m.affection}）<br>
+      興味：${lv.interest}｜${lv.jobLevel>0?'働いている様子':'まだ定職はない様子'}</div></div>`;
+  }else if(m.relStatus==='married'){
+    const sp=byId(m.spouseId);
+    if(sp){
+      const yy=m.marriedMonth!=null?yearsOf(S.totalMonths-m.marriedMonth):'—';
+      loveHtml = `<div class="love-box" style="flex:1;margin-top:0">${portraitHTML(sp,34)}
+        <div class="ldetail"><b>${sp.name}</b>さん（結婚${yy}年・仲良し度${m.affection}）<br>
+        興味：${sp.interest}｜${sp.job?jobLabelShort(sp):'無職'}</div></div>`;
+    }
+  }
+
+  body.innerHTML=`
+    <div class="profile-head" style="align-items:stretch">
+      <div style="flex:none">
+        <div class="sprite-slot">${portraitHTML(m,46)}</div>
+      </div>
+      <div style="flex:none;min-width:132px">
+        <span class="nm">${m.name}</span>
+        <button id="btnRenameToggle" style="border:1px solid var(--line);background:#fff;border-radius:5px;padding:1px 8px;font-size:10.5px;margin-left:4px;vertical-align:middle">改名</button>
+        ${m.isHeir?'<span class="chip" style="color:var(--gold);border-color:var(--gold)">👑後継ぎ</span>':''}
+        <div class="meta">${yearsOf(m.ageMonths)}歳／${moodWord(m.heart)}　<span class="chip pers">${PERSONALITIES[m.personality].label}</span></div>
+        <div id="renameBox" style="display:none;margin-top:4px;gap:5px" class="rename-inline">
+          <input id="renameInput" type="text" value="${m.name}" maxlength="8">
+          <button id="btnRename">決定</button>
+        </div>
+      </div>
+      ${loveHtml}
+    </div>
+    <div class="pf-line">❤<b>${m.heart}</b>　🔥<b>${m.enthusiasm}</b>${m.heartBuffMonths>0?`　🪶保護あと${m.heartBuffMonths}ヶ月`:''}　興味：<b>${m.interest}</b></div>
+    ${isChild?`<div class="pf-line">学業：<b>${m.academicScore}</b>点　スポーツ：<b>${m.athleticScore}</b>点（18歳で進学先が決まります）</div>`
+      : `<div class="pf-line">仕事：<b>${jobLabel(m)}</b>${m.job?`／月給${sal}G`:''}${m.school?`／${SCHOOLS.find(s=>s.key===m.school).label}卒`:''}</div>`}
+    <div class="flavor" style="margin-top:8px;font-family:var(--serif);font-size:12.5px;color:#4A4238;background:#F1EADA;border-left:3px solid var(--gold);padding:7px 10px;border-radius:0 6px 6px 0;line-height:1.7">${flavorText(m)}</div>
+    <div class="pf-events"><ul>${myLogs}</ul></div>`;
+
+  $('btnRenameToggle').onclick=()=>{
+    const box=$('renameBox');
+    box.style.display = box.style.display==='none' ? 'flex' : 'none';
+    if(box.style.display==='flex') $('renameInput').focus();
+  };
+  $('btnRename').onclick=()=>{
+    const nn = $('renameInput').value.trim();
+    if(nn && nn!==m.name){
+      const old=m.name; m.name=nn;
+      for(const l of S.logs) l.text = l.text.split(old).join(m.name);
+      addLog(`神様のきまぐれで、${old}は「${m.name}」と名を改めた。`,{ids:[m.id]});
+      render();
+    }
+  };
+}
+
+function renderInv(){
+  const body=$('invBody'); body.innerHTML='';
+  const m=selected();
+  const shopByKey = {}; for(const e of SHOP) shopByKey[e.key]=e;
+
+  for(const key of Object.keys(ARROWS_DEF)){
+    const a=ARROWS_DEF[key]; const sh=shopByKey[key];
+    const row=document.createElement('div'); row.className='inv-row';
+    let useDis = S.arrows[key]<=0 || !m;
+    if(m && (key==='koi'||key==='wakare') && m.relStatus==='single') useDis=true;
+    let buyDis = !sh || S.money<sh.price; let capNote='';
+    if(sh && sh.cap && S.arrows[key]>=sh.cap){ buyDis=true; capNote='（上限）'; }
+    row.innerHTML=`<span>${a.name}</span><span class="cnt">×${S.arrows[key]}</span>
+      <span style="flex:1;color:var(--ink-soft);font-size:10.5px">${a.desc}</span>
+      <button class="use useArrow" data-k="${key}" ${useDis?'disabled':''}>使う</button>
+      <button class="use buyEntry" data-k="${key}" ${buyDis?'disabled':''}>買う${sh?sh.price:'?'}G${capNote}</button>`;
+    body.appendChild(row);
+  }
+  for(const key of Object.keys(ITEMS_DEF)){
+    const it=ITEMS_DEF[key]; const sh=shopByKey[key];
+    const row=document.createElement('div'); row.className='inv-row';
+    let useBtn='';
+    if(key==='bookmark'){ useBtn=`<span style="color:var(--ink-soft);font-size:10.5px">系譜が途絶えた時に使えます（購入不可）</span>`; }
+    else if(key==='crystal'){
+      const useDis = S.items[key]<=0 || !m;
+      useBtn=`<button class="use useItem" data-k="${key}" ${useDis?'disabled':''}>使う</button>
+        <span style="color:var(--ink-soft);font-size:10.5px">（購入不可・世代交代で入手）</span>`;
+    }
+    else{
+      const need = key!=='box';
+      const useDis = S.items[key]<=0 || (need&&!m);
+      const buyDis = !sh || S.money<sh.price;
+      useBtn=`<button class="use useItem" data-k="${key}" ${useDis?'disabled':''}>使う</button>
+        <button class="use buyEntry" data-k="${key}" ${buyDis?'disabled':''}>買う${sh?sh.price:'?'}G</button>`;
+    }
+    row.innerHTML=`<span>${it.name}</span><span class="cnt">×${S.items[key]}</span>
+      <span style="flex:1;color:var(--ink-soft);font-size:10.5px">${it.desc}</span>${useBtn}`;
+    body.appendChild(row);
+  }
+  body.querySelectorAll('.useArrow').forEach(b=>b.onclick=()=>useArrow(b.dataset.k));
+  body.querySelectorAll('.useItem').forEach(b=>b.onclick=()=>useItem(b.dataset.k));
+  body.querySelectorAll('.buyEntry').forEach(b=>b.onclick=()=>buy(shopByKey[b.dataset.k]));
+}
+
+function renderKamidana(){
+  const list=$('kamidanaList'); list.innerHTML='';
+  for(const key of Object.keys(KAMIDANA)){
+    const k=KAMIDANA[key];
+    const chip=document.createElement('div');
+    chip.className='kami-chip'+(S.kamidana===key?' active':'');
+    chip.innerHTML=`${k.label}${S.kamidana===key?' ◉':''}<span class="kami-tip">${k.desc}（${k.cost}G/月）</span>`;
+    chip.onclick=()=>{
+      if(S.kamidana===key){ showToast(`${k.label}をお休みすることにした。`); S.kamidana=null; }
+      else{ S.kamidana=key; showToast(`神棚に${k.label}をお祀りした。（毎月${k.cost}Gのお供え）`); }
+      render();
+    };
+    list.appendChild(chip);
+  }
+}
+
+function renderLogs(){
+  const list=$('logList'); list.innerHTML='';
+  for(const l of S.logs.slice(0,150)){
+    const d=document.createElement('div');
+    d.className='log-entry'+(l.imp?' imp':'')+(l.anniv?' anniv':'');
+    d.innerHTML=`<span class="when">${fmtWhen(l.m)}</span><span class="txt">${l.text}</span>`;
+    list.appendChild(d);
+  }
+}
+
+function stopAuto(){ if(autoTimer){clearInterval(autoTimer);autoTimer=null;} $('autoChk').checked=false; }
+
+function showPending(){
+  const p=S.pending; const box=$('pendingBox');
+  box.innerHTML=`<h2 style="color:var(--shu)">家族の岐路</h2>
+    <p><b>${byId(p.memberId)?byId(p.memberId).name:''}</b>が<b>${p.loverName}</b>さんと結婚しますが、家に空きがありません。<br>
+    このまま後継ぎとして家に残しますか？　それとも分家として送り出しますか？<br>
+    <span style="font-size:11.5px;color:var(--ink-soft)">※後継ぎにすると、他の兄弟が今後の分家の対象になります。</span></p>
+    <div class="btns">
+      <button class="btn-shu" id="btnMakeHeir">後継ぎにする</button>
+      <button class="btn-plain" id="btnBranch">分家として送り出す</button>
+    </div>`;
+  $('btnMakeHeir').onclick=()=>{ resolvePendingBranch(true); render(); };
+  $('btnBranch').onclick=()=>{ resolvePendingBranch(false); render(); };
+  $('pendingOverlay').classList.add('show');
+}
+
+function showResult(){
+  stopAuto();
+  const box=$('resultBox');
+  const y=yearsOf(S.totalMonths);
+  if(S.won){
+    box.innerHTML=`<h2 class="win">系譜、ここに大成す</h2>
+      <p>${S.surname}家の系譜は<b>${y}年</b>にわたって続き、見事<b>第${S.generation}代</b>まで受け継がれました。<br>
+      生まれた命 ${S.stats.births}人／見送った命 ${S.stats.deaths}人。<br>
+      きまぐれな神様の、なかなか根気強い見守りでした。</p>
+      <div class="btns"><button class="btn-shu" onclick="location.reload()">もう一度はじめから見守る</button></div>`;
+  }else{
+    const canBack = S.items.bookmark>0;
+    box.innerHTML=`<h2 class="lose">系譜、ここに途絶える</h2>
+      <p>${S.surname}家は${y}年、第${S.generation}代まで続きましたが、跡を継ぐ者はもういませんでした。<br>
+      ${canBack?'——しかし、あなたの手元には<b>時のしおり</b>がある。':'時のしおりも、もうありません。'}</p>
+      <div class="btns">
+        ${canBack?'<button class="btn-shu" id="btnBookmark">時のしおりを使って戻る</button>':''}
+        <button class="btn-plain" onclick="location.reload()">もう一度はじめから見守る</button>
+      </div>`;
+    if(canBack){ document.getElementById('btnBookmark').onclick=()=>{ restoreSnapshot(); $('resultOverlay').classList.remove('show'); render(); }; }
+  }
+  $('resultOverlay').classList.add('show');
+}
+
+function showStats(){
+  const b=$('statsBody');
+  const heads = S.stats.headHistory.map(h=>{
+    const end = h.endMonth!=null?`${yearsOf(h.endMonth)}年`:'現在';
+    return `<tr><th>第${h.gen}代 ${h.name}</th><td>${yearsOf(h.startMonth)}年 〜 ${end}</td></tr>`;
+  }).join('');
+  b.innerHTML=`<table class="stat-table">
+    <tr><th>見守った年月</th><td>${yearsOf(S.totalMonths)}年（目標250年）</td></tr>
+    <tr><th>現在の世代</th><td>第${S.generation}代</td></tr>
+    <tr><th>生まれた人</th><td>${S.stats.births}人</td></tr>
+    <tr><th>見送った人</th><td>${S.stats.deaths}人</td></tr>
+    <tr><th>最長寿</th><td>${S.stats.longestLife>0?`${S.stats.longestName}（${S.stats.longestLife}歳）`:'—'}</td></tr>
+    <tr><th>最高ランク</th><td>${S.stats.bestRank}</td></tr>
+    ${heads}
+  </table>`;
+  $('statsOverlay').classList.add('show');
+}
+
+function advance(n){
+  for(let i=0;i<n;i++){
+    tickMonth();
+    if(S.ended || S.pending) break;
+  }
+  render();
+}
+
+$('btnStart').onclick=()=>{
+  const sn=$('inpSurname').value.trim();
+  const fn=$('inpFirstName').value.trim();
+  newGame(sn, fn);
+  $('startScreen').style.display='none';
+  $('gameScreen').style.display='block';
+  render();
+};
+$('btnM1').onclick=()=>advance(1);
+$('btnY1').onclick=()=>advance(12);
+$('btnY100').onclick=()=>advance(1200);
+$('autoChk').onchange=e=>{
+  if(e.target.checked){
+    const iv=parseInt($('autoSpeed').value,10);
+    autoTimer=setInterval(()=>{ tickMonth(); render(); if(S.ended||S.pending) stopAuto(); }, iv);
+  }else stopAuto();
+};
+$('autoSpeed').onchange=()=>{
+  if($('autoChk').checked){ stopAuto(); $('autoChk').checked=true;
+    autoTimer=setInterval(()=>{ tickMonth(); render(); if(S.ended||S.pending) stopAuto(); }, parseInt($('autoSpeed').value,10));
+  }
+};
+$('statsBtn').onclick=showStats;
+
+window.render = render;
+
+} else {
+  globalThis.__game = {
+    newGame:(s,f)=>newGame(s,f), tick:()=>tickMonth(),
+    getS:()=>S, useArrow, useItem, buy, resolvePendingBranch,
+    setS:(x)=>{S=x;}
+  };
+  globalThis.render = ()=>{};
+}
+</script>
+</body>
+</html>
